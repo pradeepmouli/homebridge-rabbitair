@@ -1,13 +1,13 @@
 {
   "bridge": {
-    "name": "PluginTemplate",
+    "name": "RabbitAir",
     "username": "AA:BB:CC:DD:EE:FF",
     "port": 51826,
     "pin": "031-45-154"
   },
-  "description": "HomeBridge HTTP Status Control",
+  "description": "HomeBridge RabbitAir Plugin",
   "plugins": [
-    "homebridge-plugin-name",
+    "homebridge-rabbitair",
     "homebridge-config-ui-x"
   ],
   "platforms": [
@@ -23,8 +23,16 @@
       "debug": false
     },
     {
-      "name": "homebridge-plugin-name",
-      "platform": "ExampleHomebridgePlugin"
+      "name": "RabbitAir",
+      "platform": "RabbitAir",
+      "devices": [
+        {
+          "name": "Living Room Air Purifier",
+          "host": "192.168.1.100",
+          "token": "0123456789ABCDEF0123456789ABCDEF",
+          "port": 9009
+        }
+      ]
     }
   ],
   "accessories": []

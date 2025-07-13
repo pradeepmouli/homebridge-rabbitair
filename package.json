@@ -1,22 +1,24 @@
 {
-  "name": "homebridge-plugin-name",
-  "displayName": "Plugin Name",
+  "name": "homebridge-rabbitair",
+  "displayName": "RabbitAir",
   "type": "module",
   "version": "1.0.0",
-  "private": true,
-  "description": "A short description about what your plugin does.",
-  "author": "Your Name",
+  "private": false,
+  "description": "Homebridge plugin for RabbitAir air purifiers",
+  "author": "Pradeep Mouli",
   "license": "Apache-2.0",
-  "homepage": "https://github.com/USERNAME/GITHUB_PROJECT_NAME#readme",
+  "homepage": "https://github.com/pradeepmouli/homebridge-rabbitair#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/USERNAME/GITHUB_PROJECT_NAME.git"
+    "url": "https://github.com/pradeepmouli/homebridge-rabbitair.git"
   },
   "bugs": {
-    "url": "https://github.com/USERNAME/GITHUB_PROJECT_NAME/issues"
+    "url": "https://github.com/pradeepmouli/homebridge-rabbitair/issues"
   },
   "keywords": [
-    "homebridge-plugin"
+    "homebridge-plugin",
+    "rabbitair",
+    "air-purifier"
   ],
   "main": "dist/index.js",
   "engines": {
@@ -30,10 +32,12 @@
     "watch": "npm run build && npm link && nodemon"
   },
   "dependencies": {
+    "crypto-js": "^4.2.0",
     "homebridge-lib": "^7.1.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
+    "@types/crypto-js": "^4.2.2",
     "@types/node": "^22.13.5",
     "eslint": "^9.21.0",
     "homebridge": "^2.0.0-beta.0",

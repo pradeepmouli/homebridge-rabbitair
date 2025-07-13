@@ -1,148 +1,291 @@
 import type { CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
 
-import type { ExampleHomebridgePlatform } from './platform.js';
+import type { RabbitAirPlatform } from './platform.js';
+import { RabbitAirClient, RabbitAirMode, RabbitAirSpeed, RabbitAirQuality } from './rabbitair-client.js';
 
 /**
- * Platform Accessory
- * An instance of this class is created for each accessory your platform registers
- * Each accessory may expose multiple services of different service types.
+ * RabbitAir Platform Accessory
+ * An instance of this class is created for each RabbitAir air purifier.
  */
-export class ExamplePlatformAccessory {
+export class RabbitAirAccessory {
   private service: Service;
+  private client: RabbitAirClient;
 
-  /**
-   * These are just used to create a working example
-   * You should implement your own code to track the state of your accessory
-   */
-  private exampleStates = {
-    On: false,
-    Brightness: 100,
+  private currentState = {
+    active: false,
+    currentAirPurifierState: 0, // Will be set in constructor
+    targetAirPurifierState: 0,  // Will be set in constructor
+    rotationSpeed: 0,
+    filterChangeIndication: 0,  // Will be set in constructor
+    filterLifeLevel: 100,
+    airQuality: 0,              // Will be set in constructor
   };
 
   constructor(
-    private readonly platform: ExampleHomebridgePlatform,
+    private readonly platform: RabbitAirPlatform,
     private readonly accessory: PlatformAccessory,
   ) {
-    // set accessory information
+    // Initialize state values now that platform is available
+    this.currentState.currentAirPurifierState = this.platform.Characteristic.CurrentAirPurifierState.INACTIVE;
+    this.currentState.targetAirPurifierState = this.platform.Characteristic.TargetAirPurifierState.MANUAL;
+    this.currentState.filterChangeIndication = this.platform.Characteristic.FilterChangeIndication.FILTER_OK;
+    this.currentState.airQuality = this.platform.Characteristic.AirQuality.UNKNOWN;
+
+    // Initialize the RabbitAir client
+    this.client = new RabbitAirClient({
+      host: accessory.context.device.host,
+      token: accessory.context.device.token,
+      port: accessory.context.device.port,
+    });
+
+    // Set accessory information
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Default-Manufacturer')
-      .setCharacteristic(this.platform.Characteristic.Model, 'Default-Model')
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, 'Default-Serial');
+      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'RabbitAir')
+      .setCharacteristic(this.platform.Characteristic.Model, 'Air Purifier')
+      .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.context.device.host);
 
-    // get the LightBulb service if it exists, otherwise create a new LightBulb service
-    // you can create multiple services for each accessory
+    // Get or create the Air Purifier service
+    this.service = this.accessory.getService(this.platform.Service.AirPurifier) || 
+                   this.accessory.addService(this.platform.Service.AirPurifier);
 
-    if (accessory.context.device.CustomService) {
-      // This is only required when using Custom Services and Characteristics not support by HomeKit
-      this.service = this.accessory.getService(this.platform.CustomServices[accessory.context.device.CustomService]) ||
-        this.accessory.addService(this.platform.CustomServices[accessory.context.device.CustomService]);
-    } else {
-      this.service = this.accessory.getService(this.platform.Service.Lightbulb) || this.accessory.addService(this.platform.Service.Lightbulb);
+    // Set the service name
+    this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.name);
+
+    // Register handlers for required characteristics
+    this.service.getCharacteristic(this.platform.Characteristic.Active)
+      .onSet(this.setActive.bind(this))
+      .onGet(this.getActive.bind(this));
+
+    this.service.getCharacteristic(this.platform.Characteristic.CurrentAirPurifierState)
+      .onGet(this.getCurrentAirPurifierState.bind(this));
+
+    this.service.getCharacteristic(this.platform.Characteristic.TargetAirPurifierState)
+      .onSet(this.setTargetAirPurifierState.bind(this))
+      .onGet(this.getTargetAirPurifierState.bind(this));
+
+    // Register handlers for optional characteristics
+    this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed)
+      .setProps({
+        minValue: 0,
+        maxValue: 5,
+        minStep: 1,
+      })
+      .onSet(this.setRotationSpeed.bind(this))
+      .onGet(this.getRotationSpeed.bind(this));
+
+    this.service.getCharacteristic(this.platform.Characteristic.FilterChangeIndication)
+      .onGet(this.getFilterChangeIndication.bind(this));
+
+    this.service.getCharacteristic(this.platform.Characteristic.FilterLifeLevel)
+      .onGet(this.getFilterLifeLevel.bind(this));
+
+    // Add Air Quality Sensor service
+    const airQualityService = this.accessory.getService(this.platform.Service.AirQualitySensor) ||
+                              this.accessory.addService(this.platform.Service.AirQualitySensor);
+
+    airQualityService.getCharacteristic(this.platform.Characteristic.AirQuality)
+      .onGet(this.getAirQuality.bind(this));
+
+    // Start periodic updates
+    this.startPeriodicUpdates();
+  }
+
+  /**
+   * Start periodic updates of device state
+   */
+  private startPeriodicUpdates() {
+    // Update state every 30 seconds
+    setInterval(async () => {
+      try {
+        await this.updateDeviceState();
+      } catch (error) {
+        this.platform.log.error('Error updating device state:', error);
+      }
+    }, 30000);
+
+    // Initial state update
+    setTimeout(async () => {
+      try {
+        await this.updateDeviceState();
+      } catch (error) {
+        this.platform.log.error('Error in initial state update:', error);
+      }
+    }, 5000);
+  }
+
+  /**
+   * Update device state from RabbitAir device
+   */
+  private async updateDeviceState() {
+    try {
+      await this.client.connect();
+      const state = await this.client.getState();
+      
+      // Update internal state
+      this.currentState.active = state.power || false;
+      
+      // Update current air purifier state based on power and speed
+      if (!state.power) {
+        this.currentState.currentAirPurifierState = this.platform.Characteristic.CurrentAirPurifierState.INACTIVE;
+      } else if (state.speed === RabbitAirSpeed.SuperSilent) {
+        this.currentState.currentAirPurifierState = this.platform.Characteristic.CurrentAirPurifierState.IDLE;
+      } else {
+        this.currentState.currentAirPurifierState = this.platform.Characteristic.CurrentAirPurifierState.PURIFYING_AIR;
+      }
+      
+      // Update target air purifier state based on mode
+      if (state.mode === RabbitAirMode.Auto) {
+        this.currentState.targetAirPurifierState = this.platform.Characteristic.TargetAirPurifierState.AUTO;
+      } else {
+        this.currentState.targetAirPurifierState = this.platform.Characteristic.TargetAirPurifierState.MANUAL;
+      }
+      
+      // Update rotation speed
+      this.currentState.rotationSpeed = state.speed || 0;
+      
+      // Update filter status
+      if (state.filterReplacement) {
+        this.currentState.filterChangeIndication = this.platform.Characteristic.FilterChangeIndication.CHANGE_FILTER;
+      } else {
+        this.currentState.filterChangeIndication = this.platform.Characteristic.FilterChangeIndication.FILTER_OK;
+      }
+      
+      // Update filter life level (convert from minutes to percentage)
+      if (state.filterLife !== undefined) {
+        this.currentState.filterLifeLevel = Math.max(0, Math.min(100, Math.round(state.filterLife / 525600 * 100)));
+      }
+      
+      // Update air quality
+      if (state.quality !== undefined) {
+        switch (state.quality) {
+        case RabbitAirQuality.Lowest:
+        case RabbitAirQuality.Low:
+          this.currentState.airQuality = this.platform.Characteristic.AirQuality.EXCELLENT;
+          break;
+        case RabbitAirQuality.Medium:
+          this.currentState.airQuality = this.platform.Characteristic.AirQuality.GOOD;
+          break;
+        case RabbitAirQuality.High:
+          this.currentState.airQuality = this.platform.Characteristic.AirQuality.FAIR;
+          break;
+        case RabbitAirQuality.Highest:
+          this.currentState.airQuality = this.platform.Characteristic.AirQuality.POOR;
+          break;
+        default:
+          this.currentState.airQuality = this.platform.Characteristic.AirQuality.UNKNOWN;
+        }
+      }
+      
+      // Update HomeKit characteristics
+      this.service.updateCharacteristic(this.platform.Characteristic.Active, this.currentState.active);
+      this.service.updateCharacteristic(this.platform.Characteristic.CurrentAirPurifierState, this.currentState.currentAirPurifierState);
+      this.service.updateCharacteristic(this.platform.Characteristic.TargetAirPurifierState, this.currentState.targetAirPurifierState);
+      this.service.updateCharacteristic(this.platform.Characteristic.RotationSpeed, this.currentState.rotationSpeed);
+      this.service.updateCharacteristic(this.platform.Characteristic.FilterChangeIndication, this.currentState.filterChangeIndication);
+      this.service.updateCharacteristic(this.platform.Characteristic.FilterLifeLevel, this.currentState.filterLifeLevel);
+      
+      const airQualityService = this.accessory.getService(this.platform.Service.AirQualitySensor);
+      if (airQualityService) {
+        airQualityService.updateCharacteristic(this.platform.Characteristic.AirQuality, this.currentState.airQuality);
+      }
+      
+      await this.client.disconnect();
+    } catch (error) {
+      this.platform.log.error('Failed to update device state:', error);
     }
-
-    // set the service name, this is what is displayed as the default name on the Home app
-    // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
-    this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.exampleDisplayName);
-
-    // each service must implement at-minimum the "required characteristics" for the given service type
-    // see https://developers.homebridge.io/#/service/Lightbulb
-
-    // register handlers for the On/Off Characteristic
-    this.service.getCharacteristic(this.platform.Characteristic.On)
-      .onSet(this.setOn.bind(this)) // SET - bind to the `setOn` method below
-      .onGet(this.getOn.bind(this)); // GET - bind to the `getOn` method below
-
-    // register handlers for the Brightness Characteristic
-    this.service.getCharacteristic(this.platform.Characteristic.Brightness)
-      .onSet(this.setBrightness.bind(this)); // SET - bind to the `setBrightness` method below
-
-    /**
-     * Creating multiple services of the same type.
-     *
-     * To avoid "Cannot add a Service with the same UUID another Service without also defining a unique 'subtype' property." error,
-     * when creating multiple services of the same type, you need to use the following syntax to specify a name and subtype id:
-     * this.accessory.getService('NAME') || this.accessory.addService(this.platform.Service.Lightbulb, 'NAME', 'USER_DEFINED_SUBTYPE_ID');
-     *
-     * The USER_DEFINED_SUBTYPE must be unique to the platform accessory (if you platform exposes multiple accessories, each accessory
-     * can use the same subtype id.)
-     */
-
-    // Example: add two "motion sensor" services to the accessory
-    const motionSensorOneService = this.accessory.getService('Motion Sensor One Name')
-      || this.accessory.addService(this.platform.Service.MotionSensor, 'Motion Sensor One Name', 'YourUniqueIdentifier-1');
-
-    const motionSensorTwoService = this.accessory.getService('Motion Sensor Two Name')
-      || this.accessory.addService(this.platform.Service.MotionSensor, 'Motion Sensor Two Name', 'YourUniqueIdentifier-2');
-
-    /**
-     * Updating characteristics values asynchronously.
-     *
-     * Example showing how to update the state of a Characteristic asynchronously instead
-     * of using the `on('get')` handlers.
-     * Here we change update the motion sensor trigger states on and off every 10 seconds
-     * the `updateCharacteristic` method.
-     *
-     */
-    let motionDetected = false;
-    setInterval(() => {
-      // EXAMPLE - inverse the trigger
-      motionDetected = !motionDetected;
-
-      // push the new value to HomeKit
-      motionSensorOneService.updateCharacteristic(this.platform.Characteristic.MotionDetected, motionDetected);
-      motionSensorTwoService.updateCharacteristic(this.platform.Characteristic.MotionDetected, !motionDetected);
-
-      this.platform.log.debug('Triggering motionSensorOneService:', motionDetected);
-      this.platform.log.debug('Triggering motionSensorTwoService:', !motionDetected);
-    }, 10000);
   }
 
-  /**
-   * Handle "SET" requests from HomeKit
-   * These are sent when the user changes the state of an accessory, for example, turning on a Light bulb.
-   */
-  async setOn(value: CharacteristicValue) {
-    // implement your own code to turn your device on/off
-    this.exampleStates.On = value as boolean;
+  // Characteristic handlers
 
-    this.platform.log.debug('Set Characteristic On ->', value);
+  async setActive(value: CharacteristicValue) {
+    const active = value as boolean;
+    this.platform.log.debug('Set Active ->', active);
+    
+    try {
+      await this.client.connect();
+      await this.client.setState({ power: active });
+      await this.client.disconnect();
+      
+      this.currentState.active = active;
+      if (!active) {
+        this.currentState.currentAirPurifierState = this.platform.Characteristic.CurrentAirPurifierState.INACTIVE;
+        this.service.updateCharacteristic(this.platform.Characteristic.CurrentAirPurifierState, this.currentState.currentAirPurifierState);
+      }
+    } catch (error) {
+      this.platform.log.error('Failed to set active state:', error);
+      throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+    }
   }
 
-  /**
-   * Handle the "GET" requests from HomeKit
-   * These are sent when HomeKit wants to know the current state of the accessory, for example, checking if a Light bulb is on.
-   *
-   * GET requests should return as fast as possible. A long delay here will result in
-   * HomeKit being unresponsive and a bad user experience in general.
-   *
-   * If your device takes time to respond you should update the status of your device
-   * asynchronously instead using the `updateCharacteristic` method instead.
-   * In this case, you may decide not to implement `onGet` handlers, which may speed up
-   * the responsiveness of your device in the Home app.
-
-   * @example
-   * this.service.updateCharacteristic(this.platform.Characteristic.On, true)
-   */
-  async getOn(): Promise<CharacteristicValue> {
-    // implement your own code to check if the device is on
-    const isOn = this.exampleStates.On;
-
-    this.platform.log.debug('Get Characteristic On ->', isOn);
-
-    // if you need to return an error to show the device as "Not Responding" in the Home app:
-    // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
-
-    return isOn;
+  async getActive(): Promise<CharacteristicValue> {
+    this.platform.log.debug('Get Active ->', this.currentState.active);
+    return this.currentState.active;
   }
 
-  /**
-   * Handle "SET" requests from HomeKit
-   * These are sent when the user changes the state of an accessory, for example, changing the Brightness
-   */
-  async setBrightness(value: CharacteristicValue) {
-    // implement your own code to set the brightness
-    this.exampleStates.Brightness = value as number;
+  async getCurrentAirPurifierState(): Promise<CharacteristicValue> {
+    this.platform.log.debug('Get Current Air Purifier State ->', this.currentState.currentAirPurifierState);
+    return this.currentState.currentAirPurifierState;
+  }
 
-    this.platform.log.debug('Set Characteristic Brightness -> ', value);
+  async setTargetAirPurifierState(value: CharacteristicValue) {
+    const targetState = value as number;
+    this.platform.log.debug('Set Target Air Purifier State ->', targetState);
+    
+    try {
+      await this.client.connect();
+      
+      if (targetState === this.platform.Characteristic.TargetAirPurifierState.AUTO) {
+        await this.client.setState({ mode: RabbitAirMode.Auto });
+      } else {
+        await this.client.setState({ mode: RabbitAirMode.Manual });
+      }
+      
+      await this.client.disconnect();
+      this.currentState.targetAirPurifierState = targetState;
+    } catch (error) {
+      this.platform.log.error('Failed to set target air purifier state:', error);
+      throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+    }
+  }
+
+  async getTargetAirPurifierState(): Promise<CharacteristicValue> {
+    this.platform.log.debug('Get Target Air Purifier State ->', this.currentState.targetAirPurifierState);
+    return this.currentState.targetAirPurifierState;
+  }
+
+  async setRotationSpeed(value: CharacteristicValue) {
+    const speed = value as number;
+    this.platform.log.debug('Set Rotation Speed ->', speed);
+    
+    try {
+      await this.client.connect();
+      await this.client.setState({ speed: speed as RabbitAirSpeed });
+      await this.client.disconnect();
+      
+      this.currentState.rotationSpeed = speed;
+    } catch (error) {
+      this.platform.log.error('Failed to set rotation speed:', error);
+      throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+    }
+  }
+
+  async getRotationSpeed(): Promise<CharacteristicValue> {
+    this.platform.log.debug('Get Rotation Speed ->', this.currentState.rotationSpeed);
+    return this.currentState.rotationSpeed;
+  }
+
+  async getFilterChangeIndication(): Promise<CharacteristicValue> {
+    this.platform.log.debug('Get Filter Change Indication ->', this.currentState.filterChangeIndication);
+    return this.currentState.filterChangeIndication;
+  }
+
+  async getFilterLifeLevel(): Promise<CharacteristicValue> {
+    this.platform.log.debug('Get Filter Life Level ->', this.currentState.filterLifeLevel);
+    return this.currentState.filterLifeLevel;
+  }
+
+  async getAirQuality(): Promise<CharacteristicValue> {
+    this.platform.log.debug('Get Air Quality ->', this.currentState.airQuality);
+    return this.currentState.airQuality;
   }
 }

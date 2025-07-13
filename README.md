@@ -1,215 +1,109 @@
-<p align="center">
+# Homebridge RabbitAir Plugin
 
-<img src="https://github.com/homebridge/branding/raw/latest/logos/homebridge-wordmark-logo-vertical.png" width="150">
+This plugin allows you to control RabbitAir air purifiers through HomeKit using Homebridge.
 
-</p>
+## Features
 
-<span align="center">
+- **Power Control**: Turn your RabbitAir air purifier on and off
+- **Mode Selection**: Switch between Auto and Manual modes
+- **Fan Speed Control**: Adjust fan speed (Silent, Low, Medium, High, Turbo)
+- **Air Quality Monitoring**: Real-time air quality sensor readings
+- **Filter Status**: Monitor filter life and receive replacement notifications
+- **HomeKit Integration**: Full HomeKit support with Siri voice control
 
-# Homebridge Platform Plugin Template
+## Installation
 
-</span>
+1. Install Homebridge if you haven't already: `npm install -g homebridge`
+2. Install this plugin: `npm install -g homebridge-rabbitair`
+3. Add the plugin to your Homebridge configuration
 
-> [!IMPORTANT]
-> **Homebridge v2.0 Information**
->
-> This template currently has a
-> - `package.json -> engines.homebridge` value of `"^1.8.0 || ^2.0.0-beta.0"`
-> - `package.json -> devDependencies.homebridge` value of `"^2.0.0-beta.0"`
->
-> This is to ensure that your plugin will build and run on both Homebridge v1 and v2.
->
-> Once Homebridge v2.0 has been released, you can remove the `-beta.0` in both places.
+## Configuration
 
----
+Add the following to your Homebridge config.json:
 
-This is a template Homebridge dynamic platform plugin and can be used as a base to help you get started developing your own plugin.
-
-This template should be used in conjunction with the [developer documentation](https://developers.homebridge.io/). A full list of all supported service types, and their characteristics is available on this site.
-
-### Clone As Template
-
-Click the link below to create a new GitHub Repository using this template, or click the *Use This Template* button above.
-
-<span align="center">
-
-### [Create New Repository From Template](https://github.com/homebridge/homebridge-plugin-template/generate)
-
-</span>
-
-### Setup Development Environment
-
-To develop Homebridge plugins you must have Node.js 18 or later installed, and a modern code editor such as [VS Code](https://code.visualstudio.com/). This plugin template uses [TypeScript](https://www.typescriptlang.org/) to make development easier and comes with pre-configured settings for [VS Code](https://code.visualstudio.com/) and ESLint. If you are using VS Code install these extensions:
-
-- [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
-
-### Install Development Dependencies
-
-Using a terminal, navigate to the project folder and run this command to install the development dependencies:
-
-```shell
-npm install
-```
-
-### Update package.json
-
-Open the [`package.json`](./package.json) and change the following attributes:
-
-- `name` - this should be prefixed with `homebridge-` or `@username/homebridge-`, is case-sensitive, and contains no spaces nor special characters apart from a dash `-`
-- `displayName` - this is the "nice" name displayed in the Homebridge UI
-- `homepage` - link to your GitHub repo's `README.md`
-- `repository.url` - link to your GitHub repo
-- `bugs.url` - link to your GitHub repo issues page
-
-When you are ready to publish the plugin you should set `private` to false, or remove the attribute entirely.
-
-### Update Plugin Defaults
-
-Open the [`src/settings.ts`](./src/settings.ts) file and change the default values:
-
-- `PLATFORM_NAME` - Set this to be the name of your platform. This is the name of the platform that users will use to register the plugin in the Homebridge `config.json`.
-- `PLUGIN_NAME` - Set this to be the same name you set in the [`package.json`](./package.json) file.
-
-Open the [`config.schema.json`](./config.schema.json) file and change the following attribute:
-
-- `pluginAlias` - set this to match the `PLATFORM_NAME` you defined in the previous step.
-
-See the [Homebridge API docs](https://developers.homebridge.io/#/config-schema#default-values) for more details on the other attributes you can set in the `config.schema.json` file.
-
-### Build Plugin
-
-TypeScript needs to be compiled into JavaScript before it can run. The following command will compile the contents of your [`src`](./src) directory and put the resulting code into the `dist` folder.
-
-```shell
-npm run build
-```
-
-### Link To Homebridge
-
-Run this command so your global installation of Homebridge can discover the plugin in your development environment:
-
-```shell
-npm link
-```
-
-You can now start Homebridge, use the `-D` flag, so you can see debug log messages in your plugin:
-
-```shell
-homebridge -D
-```
-
-### Watch For Changes and Build Automatically
-
-If you want to have your code compile automatically as you make changes, and restart Homebridge automatically between changes, you first need to add your plugin as a platform in `./test/hbConfig/config.json`:
-```
+```json
 {
-...
-    "platforms": [
+  "platforms": [
+    {
+      "platform": "RabbitAir",
+      "name": "RabbitAir",
+      "devices": [
         {
-            "name": "Config",
-            "port": 8581,
-            "platform": "config"
-        },
-        {
-            "name": "<PLUGIN_NAME>",
-            //... any other options, as listed in config.schema.json ...
-            "platform": "<PLATFORM_NAME>"
+          "name": "Living Room Air Purifier",
+          "host": "192.168.1.100",
+          "token": "0123456789ABCDEF0123456789ABCDEF",
+          "port": 9009
         }
-    ]
+      ]
+    }
+  ]
 }
 ```
 
-and then you can run:
+### Configuration Parameters
 
-```shell
-npm run watch
-```
+- `platform` (required): Must be "RabbitAir"
+- `name` (required): Display name for the platform
+- `devices` (required): Array of RabbitAir devices
+  - `name` (required): Display name for the device
+  - `host` (required): IP address or hostname of the device
+  - `token` (required): 32-character access token from the RabbitAir app
+  - `port` (optional): UDP port for communication (default: 9009)
 
-This will launch an instance of Homebridge in debug mode which will restart every time you make a change to the source code. It will load the config stored in the default location under `~/.homebridge`. You may need to stop other running instances of Homebridge while using this command to prevent conflicts. You can adjust the Homebridge startup command in the [`nodemon.json`](./nodemon.json) file.
+## Getting the Access Token
 
-### Customise Plugin
+To get the access token for your RabbitAir device:
 
-You can now start customising the plugin template to suit your requirements.
+1. Open the RabbitAir mobile app
+2. Go to the device control page
+3. Tap the "Edit" button
+4. Quickly tap "Serial Number" several times until you see the access token
 
-- [`src/platform.ts`](./src/platform.ts) - this is where your device setup and discovery should go.
-- [`src/platformAccessory.ts`](./src/platformAccessory.ts) - this is where your accessory control logic should go, you can rename or create multiple instances of this file for each accessory type you need to implement as part of your platform plugin. You can refer to the [developer documentation](https://developers.homebridge.io/) to see what characteristics you need to implement for each service type.
-- [`config.schema.json`](./config.schema.json) - update the config schema to match the config you expect from the user. See the [Plugin Config Schema Documentation](https://developers.homebridge.io/#/config-schema).
+The token is a 32-character hexadecimal string (e.g., `0123456789ABCDEF0123456789ABCDEF`).
 
-### Versioning Your Plugin
+## Supported Devices
 
-Given a version number `MAJOR`.`MINOR`.`PATCH`, such as `1.4.3`, increment the:
+This plugin is based on the [python-rabbitair](https://github.com/rabbit-air/python-rabbitair) library and supports the same RabbitAir models:
 
-1. **MAJOR** version when you make breaking changes to your plugin,
-2. **MINOR** version when you add functionality in a backwards compatible manner, and
-3. **PATCH** version when you make backwards compatible bug fixes.
+- MinusA2
+- BioGS  
+- A3
 
-You can use the `npm version` command to help you with this:
+## HomeKit Services
 
-```shell
-# major update / breaking changes
-npm version major
+Each RabbitAir device will appear in HomeKit with the following services:
 
-# minor update / new features
-npm version update
+- **Air Purifier Service**
+  - Active (on/off)
+  - Current Air Purifier State (inactive/idle/purifying)
+  - Target Air Purifier State (manual/auto)
+  - Rotation Speed (fan speed)
+  - Filter Change Indication
+  - Filter Life Level
 
-# patch / bugfixes
-npm version patch
-```
+- **Air Quality Sensor Service**
+  - Air Quality (excellent/good/fair/poor)
 
-### Publish Package
+## Troubleshooting
 
-When you are ready to publish your plugin to [npm](https://www.npmjs.com/), make sure you have removed the `private` attribute from the [`package.json`](./package.json) file then run:
+- Ensure your RabbitAir device is connected to the same network as your Homebridge server
+- Verify the access token is correct and 32 characters long
+- Check that the device IP address is correct and reachable
+- Make sure no firewall is blocking UDP port 9009
 
-```shell
-npm publish
-```
+## Development
 
-If you are publishing a scoped plugin, i.e. `@username/homebridge-xxx` you will need to add `--access=public` to command the first time you publish.
+This plugin is built with TypeScript and uses the Homebridge Plugin Template. To contribute:
 
-#### Publishing Beta Versions
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Build the plugin: `npm run build`
+4. Run linting: `npm run lint`
 
-You can publish *beta* versions of your plugin for other users to test before you release it to everyone.
+## License
 
-```shell
-# create a new pre-release version (eg. 2.1.0-beta.1)
-npm version prepatch --preid beta
+This project is licensed under the Apache 2.0 License.
 
-# publish to @beta
-npm publish --tag beta
-```
+## Credits
 
-Users can then install the  *beta* version by appending `@beta` to the install command, for example:
-
-```shell
-sudo npm install -g homebridge-example-plugin@beta
-```
-
-### Best Practices
-
-Consider creating your plugin with the [Homebridge Verified](https://github.com/homebridge/verified) criteria in mind. This will help you to create a plugin that is easy to use and works well with Homebridge.
-You can then submit your plugin to the Homebridge Verified list for review.
-The most up-to-date criteria can be found [here](https://github.com/homebridge/verified#requirements).
-For reference, the current criteria are:
-
-- **General**
-  - The plugin must be of type [dynamic platform](https://developers.homebridge.io/#/#dynamic-platform-template).
-  - The plugin must not offer the same nor less functionality than that of any existing **verified** plugin.
-- **Repo**
-  - The plugin must be published to NPM and the source code available on a GitHub repository, with issues enabled.
-  - A GitHub release should be created for every new version of your plugin, with release notes.
-- **Environment**
-  - The plugin must run on all [supported LTS versions of Node.js](https://github.com/homebridge/homebridge/wiki/How-To-Update-Node.js), at the time of writing this is Node v18, v20 and v22.
-  - The plugin must successfully install and not start unless it is configured.
-  - The plugin must not execute post-install scripts that modify the users' system in any way.
-  - The plugin must not require the user to run Homebridge in a TTY or with non-standard startup parameters, even for initial configuration.
-- **Codebase**
-  - The plugin must implement the [Homebridge Plugin Settings GUI](https://developers.homebridge.io/#/config-schema).
-  - The plugin must not contain any analytics or calls that enable you to track the user.
-  - If the plugin needs to write files to disk (cache, keys, etc.), it must store them inside the Homebridge storage directory.
-  - The plugin must not throw unhandled exceptions, the plugin must catch and log its own errors.
-
-### Useful Links
-
-Note these links are here for help but are not supported/verified by the Homebridge team
-
-- [Custom Characteristics](https://github.com/homebridge/homebridge-plugin-template/issues/20)
+Based on the [python-rabbitair](https://github.com/rabbit-air/python-rabbitair) library by the RabbitAir team.
