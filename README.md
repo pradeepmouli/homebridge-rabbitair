@@ -100,6 +100,18 @@ This plugin is built with TypeScript and uses the Homebridge Plugin Template. To
 3. Build the plugin: `npm run build`
 4. Run linting: `npm run lint`
 
+### Release Process
+
+Releases are automated through GitHub Actions:
+
+1. Update the version in `package.json`
+2. Create and push a version tag: `git tag v1.0.1 && git push origin v1.0.1`
+3. The GitHub Actions workflow will automatically:
+   - Create a GitHub release
+   - Publish the package to npm
+
+Make sure to set up the `NPM_TOKEN` secret in your repository settings for automatic npm publishing.
+
 ## License
 
 This project is licensed under the Apache 2.0 License.
