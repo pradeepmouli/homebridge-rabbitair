@@ -1,0 +1,68 @@
+{
+	"id": 6595248,
+	"data": {
+		"model": 3,
+		"firmware": [
+			1,
+			0,
+			0,
+			5
+		],
+		"power": true,
+		"mode": 2,
+		"speed": 3,
+		"quality": 4,
+		"sensitivity": 0,
+		"ionizer": true,
+		"idle": 1,
+		"moodlight": 1,
+		"filter_cleaning": false,
+		"filter_replacement": false,
+		"filter_life": 397195,
+		"light_sensor": true,
+		"filter_timer": 525600,
+		"all_light_off": 1,
+		"error": 0,
+		"tag_state": 1,
+		"tag_uid": [
+			4,
+			29,
+			198,
+			138,
+			181,
+			101,
+			129
+		],
+		"filter_type": 1,
+		"pm_sensor": [
+			1,
+			2,
+			2
+		],
+		"color": [
+			31,
+			0,
+			20,
+			0,
+			22,
+			40,
+			22,
+			30,
+			3
+		],
+		"lsens_ctl": false,
+		"filter_ctl": true,
+		"buzzer": true,
+		"gas": 1,
+		"lock": false,
+		"open": false,
+		"light_state": 4,
+		"timer_mode": 0,
+		"timer": 0,
+		"schedule": "0000000AAAA0000000000000",
+		"tz": null,
+		"s2": null,
+		"rssi": -38,
+		"v": "2.4.3"
+	}
+}

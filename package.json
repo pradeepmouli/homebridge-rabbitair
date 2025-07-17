@@ -2,7 +2,7 @@
 	"name": "homebridge-rabbitair",
 	"displayName": "Homebridge RabbitAir",
 	"type": "module",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"private": false,
 	"description": "Homebridge plugin for RabbitAir air purifiers",
 	"author": "Pradeep Mouli",

@@ -198,13 +198,10 @@ export class RabbitAirAccessory {
 			}
 
 			// Update target air purifier state based on mode
-			if (state.mode === RabbitAirMode.Auto) {
-				this.currentState.targetAirPurifierState =
-					this.platform.Characteristic.TargetAirPurifierState.AUTO;
-			} else {
-				this.currentState.targetAirPurifierState =
-					this.platform.Characteristic.TargetAirPurifierState.MANUAL;
-			}
+			this.currentState.targetAirPurifierState =
+				state.mode === RabbitAirMode.Auto
+					? this.platform.Characteristic.TargetAirPurifierState.AUTO
+					: this.platform.Characteristic.TargetAirPurifierState.MANUAL;
 
 			// Update rotation speed
 			this.currentState.rotationSpeed = state.speed || 0;
@@ -232,19 +229,19 @@ export class RabbitAirAccessory {
 					case RabbitAirQuality.Lowest:
 					case RabbitAirQuality.Low:
 						this.currentState.airQuality =
-							this.platform.Characteristic.AirQuality.EXCELLENT;
+							this.platform.Characteristic.AirQuality.POOR;
 						break;
 					case RabbitAirQuality.Medium:
 						this.currentState.airQuality =
-							this.platform.Characteristic.AirQuality.GOOD;
+							this.platform.Characteristic.AirQuality.FAIR;
 						break;
 					case RabbitAirQuality.High:
 						this.currentState.airQuality =
-							this.platform.Characteristic.AirQuality.FAIR;
+							this.platform.Characteristic.AirQuality.GOOD;
 						break;
 					case RabbitAirQuality.Highest:
 						this.currentState.airQuality =
-							this.platform.Characteristic.AirQuality.POOR;
+							this.platform.Characteristic.AirQuality.EXCELLENT;
 						break;
 					default:
 						this.currentState.airQuality =

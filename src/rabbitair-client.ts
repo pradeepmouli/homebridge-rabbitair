@@ -61,19 +61,44 @@ export interface RabbitAirConfig {
 
 export interface RabbitAirStateResponse {
 	id: number;
-	cmd: number;
+	cmd?: number;
 	data: {
+		model: number;
+		firmware: number[];
 		power: boolean;
 		mode: RabbitAirMode;
 		speed: RabbitAirSpeed;
 		quality: RabbitAirQuality;
 		sensitivity: RabbitAirSensitivity;
 		ionizer: boolean;
-		filter_life: number;
+		idle: number;
+		moodlight: number;
 		filter_cleaning: boolean;
 		filter_replacement: boolean;
+		filter_life: number;
+		light_sensor: boolean;
+		filter_timer: number;
+		all_light_off: number;
 		error: number;
+		tag_state: number;
+		tag_uid: number[];
+		filter_type: number;
+		pm_sensor: number[];
+		color: number[];
+		lsens_ctl: boolean;
+		filter_ctl: boolean;
+		buzzer: boolean;
+		gas: number;
+		lock: boolean;
+		open: boolean;
+		light_state: number;
+		timer_mode: number;
+		timer: number;
+		schedule: string;
+		tz: string | null;
+		s2: string | null;
 		rssi: number;
+		v: string;
 	};
 	error?: number;
 }
@@ -746,7 +771,7 @@ export class RabbitAirClient {
 			}
 
 			const response = await this.sendCommandWithRetry({ cmd: 4 });
-			const data = response.data as Record<string, unknown>;
+			const data = response.data as RabbitAirStateResponse['data'];
 
 			if (!data) {
 				this.logger.error('Invalid response data: no data field found');
@@ -763,6 +788,7 @@ export class RabbitAirClient {
 				filterLife: data.filter_life as number,
 				filterCleaning: data.filter_cleaning as boolean,
 				filterReplacement: data.filter_replacement as boolean,
+
 				error: data.error as number,
 				rssi: data.rssi as number
 			};
