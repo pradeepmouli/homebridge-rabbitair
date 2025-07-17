@@ -1,6 +1,6 @@
 {
 	"name": "homebridge-rabbitair",
-	"displayName": "RabbitAir",
+	"displayName": "Homebridge RabbitAir",
 	"type": "module",
 	"version": "1.0.3",
 	"private": false,
@@ -28,6 +28,7 @@
 	"scripts": {
 		"build": "rimraf ./dist && tsc",
 		"lint": "eslint . --max-warnings=0",
+		"version": "changelog --release --commit",
 		"prepublishOnly": "npm run lint && npm run build",
 		"watch": "npm run build && npm link && nodemon"
 	},
