@@ -34,6 +34,7 @@
 	},
 	"dependencies": {
 		"crypto-js": "^4.2.0",
+		"hap-fluent": "github:pradeepmouli/hap-fluent",
 		"homebridge-lib": "^7.1.6"
 	},
 	"devDependencies": {
@@ -41,14 +42,17 @@
 		"@types/crypto-js": "^4.2.2",
 		"@types/node": "^22.13.5",
 		"eslint": "^9.31.0",
+		"hap-nodejs": "1.2.0",
 		"homebridge": "^1.11.0",
 		"jiti": "^2.4.2",
 		"nodemon": "^3.1.10",
 		"prettier": "^3.6.2",
 		"rimraf": "^6.0.1",
+		"ts-morph": "^26.0.0",
 		"ts-node": "^10.9.2",
 		"tsx": "^4.20.3",
-		"typescript": "^5.7.3",
+		"type-fest": "^4.41.0",
+		"typescript": "^5.8.3",
 		"typescript-eslint": "^8.37.0"
 	}
 }

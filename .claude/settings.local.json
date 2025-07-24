@@ -2,7 +2,15 @@
   "permissions": {
     "allow": [
       "Bash(git tag:*)",
-      "WebFetch(domain:marketplace.visualstudio.com)"
+      "WebFetch(domain:marketplace.visualstudio.com)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(npx tsc:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(rm:*)",
+      "Bash(git init:*)"
     ],
     "deny": []
   }

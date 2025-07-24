@@ -7,5 +7,7 @@
 		140
 	],
 	"eslint.enable": true,
-	"ColorfulMonorepo.arrange.init": true
+	"ColorfulMonorepo.arrange.init": true,
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"typescript.experimental.useTsgo": false
 }

@@ -7,7 +7,7 @@ export default tseslint.config(
 	},
 	{
 		rules: {
-			quotes: ['error', 'single'],
+			quotes: ['warn', 'single'],
 			indent: ['warn', 'tab', { SwitchCase: 1 }],
 			'no-tabs': 'off',
 			'no-mixed-spaces-and-tabs': 'off',
