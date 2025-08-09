@@ -1,7 +1,6 @@
 import CryptoJS from 'crypto-js';
 import { createSocket, Socket } from 'dgram';
 import { Logger } from 'homebridge';
-import 'hap-fluent';
 
 export enum RabbitAirMode {
 	Auto = 0,

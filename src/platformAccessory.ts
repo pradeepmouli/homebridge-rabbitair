@@ -1,6 +1,4 @@
-import { type CharacteristicValue, type PlatformAccessory } from 'homebridge';
-import { CamelCase } from 'type-fest';
-import type { Service } from 'homebridge';
+import { type CharacteristicValue, type PlatformAccessory, type Service } from 'homebridge';
 import type { RabbitAirPlatform } from './platform.js';
 import {
 	RabbitAirClient,
@@ -9,16 +7,12 @@ import {
 	RabbitAirSpeed
 } from './rabbitair-client.js';
 
-import { wrap } from 'hap-fluent';
-
 /**
  * RabbitAir Platform Accessory
  * An instance of this class is created for each RabbitAir air purifier.
  */
 export class RabbitAirAccessory {
-	private service: ReturnType<
-		typeof createFluentService<typeof Service.AirPurifier>
-	>;
+	private service: Service;
 	private client: RabbitAirClient;
 	private updateInterval: NodeJS.Timeout | null = null;
 	private initialUpdateTimeout: NodeJS.Timeout | null = null;
@@ -68,22 +62,22 @@ export class RabbitAirAccessory {
 			);
 
 		// Get or create the Air Purifier service
-		this.service = createFluentService<typeof Service.AirPurifier>(
+		this.service = 
 			this.accessory.getService(this.platform.Service.AirPurifier) ||
-			this.accessory.addService(this.platform.Service.AirPurifier)
-		);
+			this.accessory.addService(this.platform.Service.AirPurifier);
 
-
-		this.service.characteristics.CurrentAirPurifierState;
-		this.service.onGet('active', this.getActive.bind(this));
-		this.service.onSet('active', this.setActive.bind(this));
 		// Set the service name
-		this.service.name = accessory.context.device.name;
+		this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.name);
 
 		// Register handlers for required characteristics
+		this.service
+			.getCharacteristic(this.platform.Characteristic.Active)
+			.onSet(this.setActive.bind(this))
+			.onGet(this.getActive.bind(this));
 
-
-		this.service.onGet('currentAirPurifierState', this.getCurrentAirPurifierState.bind(this));
+		this.service
+			.getCharacteristic(this.platform.Characteristic.CurrentAirPurifierState)
+			.onGet(this.getCurrentAirPurifierState.bind(this));
 
 		this.service
 			.getCharacteristic(this.platform.Characteristic.TargetAirPurifierState)
@@ -91,8 +85,8 @@ export class RabbitAirAccessory {
 			.onGet(this.getTargetAirPurifierState.bind(this));
 
 		// Register handlers for optional characteristics
-		this.service.characteristics
-			.(this.platform.Characteristic.RotationSpeed)
+		this.service
+			.getCharacteristic(this.platform.Characteristic.RotationSpeed)
 			.setProps({
 				minValue: 0,
 				maxValue: 5,
