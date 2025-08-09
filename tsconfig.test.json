@@ -1,0 +1,14 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"module": "CommonJS",
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true
+	},
+	"ts-node": {
+		"esm": true,
+		"compilerOptions": {
+			"module": "ESNext"
+		}
+	}
+}
