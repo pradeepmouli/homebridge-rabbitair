@@ -1,5 +1,4 @@
 {
-	"require": ["./test/setup.ts"],
 	"recursive": true,
 	"timeout": 5000,
 	"exit": true
