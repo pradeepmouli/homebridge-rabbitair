@@ -1,15 +1,18 @@
-import type {
-	API,
-	Characteristic,
-	DynamicPlatformPlugin,
-	Logging,
-	PlatformAccessory,
-	PlatformConfig,
-	Service
+/* eslint-disable max-len */
+import {
+	Categories,
+	type API,
+	type Characteristic,
+	type DynamicPlatformPlugin,
+	type Logging,
+	type PlatformAccessory,
+	type PlatformConfig,
+	type Service
 } from 'homebridge';
 
 import { RabbitAirAccessory } from './platformAccessory.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
+import { initializeAccessory, AccessoryInformation, AirPurifier, Enums } from 'hap-fluent';
 
 export interface RabbitAirPlatformConfig extends PlatformConfig {
 	devices?: Array<{
@@ -20,11 +23,15 @@ export interface RabbitAirPlatformConfig extends PlatformConfig {
 	}>;
 }
 
+
 /**
  * RabbitAirPlatform
  * This class is the main constructor for the RabbitAir plugin, responsible for
  * parsing the user config and discovering/registering accessories with Homebridge.
  */
+
+
+
 export class RabbitAirPlatform implements DynamicPlatformPlugin {
 	public readonly Service: typeof Service;
 	public readonly Characteristic: typeof Characteristic;
@@ -33,13 +40,15 @@ export class RabbitAirPlatform implements DynamicPlatformPlugin {
 	public readonly accessories: Map<string, PlatformAccessory> = new Map();
 	public readonly discoveredCacheUUIDs: string[] = [];
 
-	constructor(
+	constructor (
 		public readonly log: Logging,
 		public readonly config: RabbitAirPlatformConfig,
 		public readonly api: API
 	) {
 		this.Service = api.hap.Service;
 		this.Characteristic = api.hap.Characteristic;
+
+
 
 		this.log.debug('Finished initializing platform:', this.config.name);
 
@@ -61,6 +70,10 @@ export class RabbitAirPlatform implements DynamicPlatformPlugin {
 	configureAccessory(accessory: PlatformAccessory) {
 		this.log.info('Loading accessory from cache:', accessory.displayName);
 
+		initializeAccessory(accessory, {
+			accessoryInformation: { manufacturer: 'RabbitAir', model: 'RabbitAir A3', serialNumber: accessory.UUID },
+			airPurifier: { active: Enums.Active.Active, currentAirPurifierState: 0, targetAirPurifierState: 0, rotationSpeed: 0, lockPhysicalControls: Enums.LockPhysicalControls.ControlLockEnabled }
+		});
 		// add the restored accessory to the accessories cache, so we can track if it has already been registered
 		this.accessories.set(accessory.UUID, accessory);
 	}
@@ -100,6 +113,7 @@ export class RabbitAirPlatform implements DynamicPlatformPlugin {
 			const existingAccessory = this.accessories.get(uuid);
 
 			if (existingAccessory) {
+
 				// the accessory already exists
 				this.log.info(
 					'Restoring existing accessory from cache:',

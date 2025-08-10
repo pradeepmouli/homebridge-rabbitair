@@ -43,6 +43,18 @@ export interface RabbitAirState {
 	filterReplacement?: boolean;
 	error?: number;
 	rssi?: number;
+
+	pmLevels?: {
+		pm1?: number;
+		pm25?: number;
+		pm10?: number;
+	};
+
+	voc?: number;
+	gas?: number;
+
+	idle?: number;
+
 }
 
 export interface RabbitAirInfo {
@@ -130,7 +142,7 @@ export class RabbitAirClient {
 	private connectionAttempts = 0;
 	private readonly MAX_CONNECTION_ATTEMPTS = 5;
 
-	constructor(config: RabbitAirConfig, logger: Logger) {
+	constructor (config: RabbitAirConfig, logger: Logger) {
 		this.logger = logger;
 		this.host = config.host;
 		this.port = config.port || 9009;
