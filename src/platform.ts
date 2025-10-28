@@ -1,6 +1,5 @@
 /* eslint-disable max-len */
 import {
-	Categories,
 	type API,
 	type Characteristic,
 	type DynamicPlatformPlugin,
@@ -12,7 +11,6 @@ import {
 
 import { RabbitAirAccessory } from './platformAccessory.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
-import { initializeAccessory, AccessoryInformation, AirPurifier, Enums } from 'hap-fluent';
 
 export interface RabbitAirPlatformConfig extends PlatformConfig {
 	devices?: Array<{
@@ -50,14 +48,14 @@ export class RabbitAirPlatform implements DynamicPlatformPlugin {
 
 
 
-		this.log.debug('Finished initializing platform:', this.config.name);
+		this.log?.debug?.('Finished initializing platform:', this.config.name);
 
 		// When this event is fired it means Homebridge has restored all cached accessories from disk.
 		// Dynamic Platform plugins should only register new accessories after this event was fired,
 		// in order to ensure they weren't added to homebridge already. This event can also be used
 		// to start discovery of new accessories.
 		this.api.on('didFinishLaunching', () => {
-			log.debug('Executed didFinishLaunching callback');
+			log.debug?.('Executed didFinishLaunching callback');
 			// run the method to discover / register your devices as accessories
 			this.discoverDevices();
 		});
@@ -68,12 +66,8 @@ export class RabbitAirPlatform implements DynamicPlatformPlugin {
 	 * It should be used to set up event handlers for characteristics and update respective values.
 	 */
 	configureAccessory(accessory: PlatformAccessory) {
-		this.log.info('Loading accessory from cache:', accessory.displayName);
+		this.log.info?.('Loading accessory from cache:', accessory.displayName);
 
-		initializeAccessory(accessory, {
-			accessoryInformation: { manufacturer: 'RabbitAir', model: 'RabbitAir A3', serialNumber: accessory.UUID },
-			airPurifier: { active: Enums.Active.Active, currentAirPurifierState: 0, targetAirPurifierState: 0, rotationSpeed: 0, lockPhysicalControls: Enums.LockPhysicalControls.ControlLockEnabled }
-		});
 		// add the restored accessory to the accessories cache, so we can track if it has already been registered
 		this.accessories.set(accessory.UUID, accessory);
 	}
@@ -81,7 +75,7 @@ export class RabbitAirPlatform implements DynamicPlatformPlugin {
 	/**
 	 * Discover and register RabbitAir devices from the platform config.
 	 */
-	discoverDevices() {
+	async discoverDevices() {
 		// Check if devices are configured
 		if (!this.config.devices || this.config.devices.length === 0) {
 			this.log.warn(
@@ -120,7 +114,7 @@ export class RabbitAirPlatform implements DynamicPlatformPlugin {
 					existingAccessory.displayName
 				);
 
-				// if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
+				// Update accessory context with current config
 				existingAccessory.context.device = deviceConfig;
 				this.api.updatePlatformAccessories([existingAccessory]);
 
@@ -161,7 +155,7 @@ export class RabbitAirPlatform implements DynamicPlatformPlugin {
 		}
 
 		// Remove any cached accessories that are no longer in the config
-		for (const [uuid, accessory] of this.accessories) {
+		for (const [uuid, accessory] of Array.from(this.accessories)) {
 			if (!this.discoveredCacheUUIDs.includes(uuid)) {
 				this.log.info(
 					'Removing existing accessory from cache:',

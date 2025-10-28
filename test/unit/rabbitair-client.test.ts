@@ -1,15 +1,18 @@
-import { expect } from 'chai';
-import sinon from 'sinon';
+import { expect, use } from 'chai';
 import { Logger } from 'homebridge';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
 import {
 	RabbitAirClient,
 	RabbitAirMode,
-	RabbitAirSpeed,
 	RabbitAirQuality,
 	RabbitAirSensitivity,
+	RabbitAirSpeed,
 	type RabbitAirConfig,
 	type RabbitAirState
 } from '../../src/rabbitair-client.js';
+
+use(sinonChai);
 
 describe('RabbitAirClient', () => {
 	let client: RabbitAirClient;
@@ -39,23 +42,24 @@ describe('RabbitAirClient', () => {
 			expect(() => {
 				client = new RabbitAirClient(validConfig, mockLogger);
 			}).to.not.throw();
-			
-			expect(mockLogger.debug).to.have.been.calledOnce;
+
+			// The constructor calls debug 3 times: host initialization, token validation, and command ID generation
+			expect(mockLogger.debug).to.have.been.calledThrice;
 		});
 
 		it('should throw an error with invalid token length', () => {
 			const invalidConfig = { ...validConfig, token: 'too-short' };
-			
+
 			expect(() => {
 				client = new RabbitAirClient(invalidConfig, mockLogger);
 			}).to.throw('Invalid token length');
-			
+
 			expect(mockLogger.error).to.have.been.calledWith('Invalid token length. Token must be 32 characters (16 bytes hex)');
 		});
 
 		it('should use default port if not provided', () => {
 			const configWithoutPort = { host: validConfig.host, token: validConfig.token };
-			
+
 			expect(() => {
 				client = new RabbitAirClient(configWithoutPort, mockLogger);
 			}).to.not.throw();

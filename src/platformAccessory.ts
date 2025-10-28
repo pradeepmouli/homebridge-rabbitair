@@ -1,4 +1,5 @@
-import { type CharacteristicValue, type PlatformAccessory, type Service } from 'homebridge';
+/* eslint-disable @typescript-eslint/no-empty-object-type */
+import { type CharacteristicValue, type PlatformAccessory } from 'homebridge';
 import type { RabbitAirPlatform } from './platform.js';
 import {
 	RabbitAirClient,
@@ -7,12 +8,15 @@ import {
 	RabbitAirSpeed
 } from './rabbitair-client.js';
 
+import type { AccessoryInformation, AirPurifier, AirQualitySensor, FilterMaintenance } from 'hap-fluent';
+import { AccessoryHandler, Enums } from 'hap-fluent';
+
+
 /**
  * RabbitAir Platform Accessory
  * An instance of this class is created for each RabbitAir air purifier.
  */
-export class RabbitAirAccessory {
-	private service: Service;
+export class RabbitAirAccessory extends AccessoryHandler<{}, [AirPurifier, AirQualitySensor, AccessoryInformation, FilterMaintenance]> {
 	private client: RabbitAirClient;
 	private updateInterval: NodeJS.Timeout | null = null;
 	private initialUpdateTimeout: NodeJS.Timeout | null = null;
@@ -27,19 +31,17 @@ export class RabbitAirAccessory {
 		airQuality: 0 // Will be set in constructor
 	};
 
+
+
 	constructor (
-		private readonly platform: RabbitAirPlatform,
-		private readonly accessory: PlatformAccessory
+		public readonly platform: RabbitAirPlatform,
+		public readonly accessory: PlatformAccessory
 	) {
+		super(platform, accessory);
+
+		// Initialize services
+
 		// Initialize state values now that platform is available
-		this.currentState.currentAirPurifierState =
-			this.platform.Characteristic.CurrentAirPurifierState.INACTIVE;
-		this.currentState.targetAirPurifierState =
-			this.platform.Characteristic.TargetAirPurifierState.MANUAL;
-		this.currentState.filterChangeIndication =
-			this.platform.Characteristic.FilterChangeIndication.FILTER_OK;
-		this.currentState.airQuality =
-			this.platform.Characteristic.AirQuality.UNKNOWN;
 
 		// Initialize the RabbitAir client
 		this.client = new RabbitAirClient(
@@ -50,70 +52,56 @@ export class RabbitAirAccessory {
 			},
 			this.platform.log
 		);
-
-		// Set accessory information
-		this.accessory
-			.getService(this.platform.Service.AccessoryInformation)!
-			.setCharacteristic(this.platform.Characteristic.Manufacturer, 'RabbitAir')
-			.setCharacteristic(this.platform.Characteristic.Model, 'Air Purifier')
-			.setCharacteristic(
-				this.platform.Characteristic.SerialNumber,
-				accessory.context.device.host
-			);
-
-		// Get or create the Air Purifier service
-		this.service = 
-			this.accessory.getService(this.platform.Service.AirPurifier) ||
-			this.accessory.addService(this.platform.Service.AirPurifier);
-
-		// Set the service name
-		this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.name);
-
-		// Register handlers for required characteristics
-		this.service
-			.getCharacteristic(this.platform.Characteristic.Active)
-			.onSet(this.setActive.bind(this))
-			.onGet(this.getActive.bind(this));
-
-		this.service
-			.getCharacteristic(this.platform.Characteristic.CurrentAirPurifierState)
-			.onGet(this.getCurrentAirPurifierState.bind(this));
-
-		this.service
-			.getCharacteristic(this.platform.Characteristic.TargetAirPurifierState)
-			.onSet(this.setTargetAirPurifierState.bind(this))
-			.onGet(this.getTargetAirPurifierState.bind(this));
-
-		// Register handlers for optional characteristics
-		this.service
-			.getCharacteristic(this.platform.Characteristic.RotationSpeed)
-			.setProps({
-				minValue: 0,
-				maxValue: 5,
-				minStep: 1
-			})
-			.onSet(this.setRotationSpeed.bind(this))
-			.onGet(this.getRotationSpeed.bind(this));
-
-		this.service
-			.getCharacteristic(this.platform.Characteristic.FilterChangeIndication)
-			.onGet(this.getFilterChangeIndication.bind(this));
-
-		this.service
-			.getCharacteristic(this.platform.Characteristic.FilterLifeLevel)
-			.onGet(this.getFilterLifeLevel.bind(this));
-
-		// Add Air Quality Sensor service
-		const airQualityService =
-			this.accessory.getService(this.platform.Service.AirQualitySensor) ||
-			this.accessory.addService(this.platform.Service.AirQualitySensor);
-
-		airQualityService
-			.getCharacteristic(this.platform.Characteristic.AirQuality)
-			.onGet(this.getAirQuality.bind(this));
+		this.cleanup();
 
 		// Start periodic updates
 		this.startPeriodicUpdates();
+
+		this.initialize({
+			accessoryInformation: {},
+			airPurifier: {
+				active: this.currentState.active ? Enums.Active.Active : Enums.Active.Inactive,
+				currentAirPurifierState: this.currentState.currentAirPurifierState,
+				targetAirPurifierState: this.currentState.targetAirPurifierState,
+				rotationSpeed: this.currentState.rotationSpeed
+
+			},
+			airQualitySensor: {
+				airQuality: this.currentState.airQuality,
+				vocDensity: 0,
+				pm25Density: 0,
+				pm10Density: 0
+			},
+			filterMaintenance: {
+				filterChangeIndication: this.currentState.filterChangeIndication,
+				filterLifeLevel: this.currentState.filterLifeLevel
+			}
+		});
+
+		// Defer service configuration to next tick to ensure services are initialized
+		process.nextTick(() => {
+			this.configureServices();
+		});
+	}
+
+	/**
+	 * Configure service characteristics and event handlers
+	 */
+	private configureServices() {
+		// Type assertion to help TypeScript understand the services are initialized
+		const services = this.services as unknown as {
+			airQualitySensor?: { characteristics?: { AirQuality?: { setProps: (props: unknown) => void } } };
+			airPurifier?: { characteristics?: { Active?: { onSet: (handler: (value: unknown) => Promise<void>) => void } } };
+		};
+
+		if (services?.airQualitySensor?.characteristics?.AirQuality) {
+			services.airQualitySensor.characteristics.AirQuality.setProps({ minValue: 0, maxValue: 6 });
+		}
+		if (services?.airPurifier?.characteristics?.Active) {
+			services.airPurifier.characteristics.Active.onSet(async (value: unknown) => {
+				await this.client.setState({ power: value ? true : false });
+			});
+		}
 	}
 
 	/**
@@ -173,43 +161,56 @@ export class RabbitAirAccessory {
 	private async updateDeviceState() {
 		try {
 			const state = await this.client.getState();
+			const services = this.services as unknown as {
+				airPurifier?: {
+					active?: unknown;
+					currentAirPurifierState?: unknown;
+					targetAirPurifierState?: unknown;
+					rotationSpeed?: unknown;
+				};
+				airQualitySensor?: { airQuality?: unknown };
+				filterMaintenance?: {
+					filterLifeLevel?: unknown;
+					filterChangeIndication?: unknown;
+				};
+			};
+			
+			services.airPurifier.active = state.power ? Enums.Active.Active : Enums.Active.Inactive;
+			// Update internal stat
 
-			// Update internal state
-			this.currentState.active = state.power || false;
 
 			// Update current air purifier state based on power and speed
 			if (!state.power) {
-				this.currentState.currentAirPurifierState =
-					this.platform.Characteristic.CurrentAirPurifierState.INACTIVE;
-			} else if (state.speed === RabbitAirSpeed.SuperSilent) {
-				this.currentState.currentAirPurifierState =
-					this.platform.Characteristic.CurrentAirPurifierState.IDLE;
+				services.airPurifier.currentAirPurifierState =
+					Enums.CurrentAirPurifierState.Inactive;
+			} else if (state.idle === RabbitAirSpeed.SuperSilent) {
+				services.airPurifier.currentAirPurifierState = Enums.CurrentAirPurifierState.Idle;
 			} else {
-				this.currentState.currentAirPurifierState =
-					this.platform.Characteristic.CurrentAirPurifierState.PURIFYING_AIR;
+				services.airPurifier.currentAirPurifierState = Enums.CurrentAirPurifierState.PurifyingAir;
 			}
 
-			// Update target air purifier state based on mode
-			this.currentState.targetAirPurifierState =
+			services.airPurifier.targetAirPurifierState =
 				state.mode === RabbitAirMode.Auto
-					? this.platform.Characteristic.TargetAirPurifierState.AUTO
-					: this.platform.Characteristic.TargetAirPurifierState.MANUAL;
+					? Enums.TargetAirPurifierState.Auto
+					: Enums.TargetAirPurifierState.Manual;
+
+			// Update target air purifier state based on mode
 
 			// Update rotation speed
-			this.currentState.rotationSpeed = state.speed || 0;
+			services.airPurifier.rotationSpeed = state.speed || 0;
 
 			// Update filter status
 			if (state.filterReplacement) {
-				this.currentState.filterChangeIndication =
-					this.platform.Characteristic.FilterChangeIndication.CHANGE_FILTER;
+				services.filterMaintenance.filterChangeIndication =
+					Enums.FilterChangeIndication.ChangeFilter;
 			} else {
-				this.currentState.filterChangeIndication =
-					this.platform.Characteristic.FilterChangeIndication.FILTER_OK;
+				services.filterMaintenance.filterChangeIndication =
+					Enums.FilterChangeIndication.FilterOk;
 			}
 
 			// Update filter life level (convert from minutes to percentage)
 			if (state.filterLife !== undefined) {
-				this.currentState.filterLifeLevel = Math.max(
+				services.filterMaintenance.filterLifeLevel = Math.max(
 					0,
 					Math.min(100, Math.round((state.filterLife / 525600) * 100))
 				);
@@ -220,52 +221,27 @@ export class RabbitAirAccessory {
 				switch (state.quality) {
 					case RabbitAirQuality.Lowest:
 					case RabbitAirQuality.Low:
-						this.currentState.airQuality =
-							this.platform.Characteristic.AirQuality.POOR;
+						services.airQualitySensor.airQuality =
+							Enums.AirQuality.Poor;
 						break;
 					case RabbitAirQuality.Medium:
-						this.currentState.airQuality =
-							this.platform.Characteristic.AirQuality.FAIR;
+						services.airQualitySensor.airQuality =
+							Enums.AirQuality.Fair;
 						break;
 					case RabbitAirQuality.High:
-						this.currentState.airQuality =
-							this.platform.Characteristic.AirQuality.GOOD;
+						services.airQualitySensor.airQuality =
+							Enums.AirQuality.Good;
 						break;
 					case RabbitAirQuality.Highest:
-						this.currentState.airQuality =
-							this.platform.Characteristic.AirQuality.EXCELLENT;
+						services.airQualitySensor.airQuality =
+							Enums.AirQuality.Excellent;
 						break;
 					default:
-						this.currentState.airQuality =
-							this.platform.Characteristic.AirQuality.UNKNOWN;
+						services.airQualitySensor.airQuality =
+							Enums.AirQuality.Unknown;
 				}
 			}
 
-			// Update HomeKit characteristics
-			this.service.updateCharacteristic(
-				this.platform.Characteristic.Active,
-				this.currentState.active
-			);
-			this.service.updateCharacteristic(
-				this.platform.Characteristic.CurrentAirPurifierState,
-				this.currentState.currentAirPurifierState
-			);
-			this.service.updateCharacteristic(
-				this.platform.Characteristic.TargetAirPurifierState,
-				this.currentState.targetAirPurifierState
-			);
-			this.service.updateCharacteristic(
-				this.platform.Characteristic.RotationSpeed,
-				this.currentState.rotationSpeed
-			);
-			this.service.updateCharacteristic(
-				this.platform.Characteristic.FilterChangeIndication,
-				this.currentState.filterChangeIndication
-			);
-			this.service.updateCharacteristic(
-				this.platform.Characteristic.FilterLifeLevel,
-				this.currentState.filterLifeLevel
-			);
 
 			const airQualityService = this.accessory.getService(
 				this.platform.Service.AirQualitySensor
@@ -290,15 +266,7 @@ export class RabbitAirAccessory {
 		try {
 			await this.client.setState({ power: active });
 
-			this.currentState.active = active;
-			if (!active) {
-				this.currentState.currentAirPurifierState =
-					this.platform.Characteristic.CurrentAirPurifierState.INACTIVE;
-				this.service.updateCharacteristic(
-					this.platform.Characteristic.CurrentAirPurifierState,
-					this.currentState.currentAirPurifierState
-				);
-			}
+
 		} catch (error) {
 			this.platform.log.error('Failed to set active state:', error);
 			throw new this.platform.api.hap.HapStatusError(
