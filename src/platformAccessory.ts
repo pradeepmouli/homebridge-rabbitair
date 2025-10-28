@@ -90,8 +90,8 @@ export class RabbitAirAccessory extends AccessoryHandler<{}, [AirPurifier, AirQu
 	private configureServices() {
 		// Type assertion to help TypeScript understand the services are initialized
 		const services = this.services as unknown as {
-			airQualitySensor?: { characteristics?: { AirQuality?: { setProps: (props: unknown) => void } } };
-			airPurifier?: { characteristics?: { Active?: { onSet: (handler: (value: unknown) => Promise<void>) => void } } };
+			airQualitySensor?: { characteristics?: { AirQuality?: { setProps: (props: unknown) => void; }; }; };
+			airPurifier?: { characteristics?: { Active?: { onSet: (handler: (value: unknown) => Promise<void>) => void; }; }; };
 		};
 
 		if (services?.airQualitySensor?.characteristics?.AirQuality) {
@@ -168,13 +168,13 @@ export class RabbitAirAccessory extends AccessoryHandler<{}, [AirPurifier, AirQu
 					targetAirPurifierState?: unknown;
 					rotationSpeed?: unknown;
 				};
-				airQualitySensor?: { airQuality?: unknown };
+				airQualitySensor?: { airQuality?: unknown; };
 				filterMaintenance?: {
 					filterLifeLevel?: unknown;
 					filterChangeIndication?: unknown;
 				};
 			};
-			
+
 			services.airPurifier.active = state.power ? Enums.Active.Active : Enums.Active.Inactive;
 			// Update internal stat
 
