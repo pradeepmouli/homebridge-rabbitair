@@ -191,12 +191,16 @@ describe('Homebridge RabbitAir E2E Flow', () => {
 		});
 
 		it('should handle connection attempts to mock server', async () => {
-			// This test validates that the client attempts to connect
-			// Actual communication is complex due to encryption requirements
+			// This test validates that the client attempts to connect.
+			// Actual UDP communication requires:
+			// 1. AES-256-CBC encrypted messages with device-specific token
+			// 2. Timestamp synchronization handshake (cmd: 9)
+			// 3. Proper message framing with IV prepended to ciphertext
+			// The mock server implements basic encryption but may not match exact device behavior
 			try {
 				await client.getState();
 			} catch (err: any) {
-				// Expected to fail without proper encryption handshake
+				// Expected to fail without matching the exact encryption implementation
 				expect(err.message).to.be.oneOf(['Device not reachable', 'Timeout']);
 			}
 		});
