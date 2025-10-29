@@ -31,6 +31,7 @@
     "test": "mocha --require tsx 'test/**/*.test.ts'",
     "test:unit": "tsx ./node_modules/.bin/mocha 'test/unit/**/*.test.ts'",
     "test:integration": "tsx ./node_modules/.bin/mocha 'test/integration/**/*.test.ts'",
+    "test:e2e": "tsx ./node_modules/.bin/mocha 'test/e2e/**/*.test.ts' --timeout 10000",
     "test:coverage": "c8 npm run test",
     "test:watch": "npm run test -- --watch",
     "version": "changelog --release --commit",
