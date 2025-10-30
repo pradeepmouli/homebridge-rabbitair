@@ -1,6 +1,6 @@
 # Testing
 
-This project includes comprehensive unit and integration tests to ensure the reliability and correctness of the RabbitAir Homebridge plugin.
+This project includes comprehensive unit, integration, and end-to-end (E2E) tests to ensure the reliability and correctness of the RabbitAir Homebridge plugin.
 
 ## Test Structure
 
@@ -11,6 +11,9 @@ test/
 ├── integration/       # Integration tests
 │   ├── platform.test.ts   # Platform lifecycle tests
 │   └── plugin.test.ts     # Plugin registration tests
+├── e2e/              # End-to-end tests
+│   ├── MockRabbitAirServer.ts  # Mock UDP server for device simulation
+│   └── homebridge.test.ts      # E2E flow validation tests
 └── unit/             # Unit tests
     ├── enums.test.ts           # Enum value tests
     ├── platform.test.ts       # RabbitAirPlatform tests
@@ -30,27 +33,32 @@ test/
 
 ### All Tests
 ```bash
-pnpm test
+npm test
 ```
 
 ### Unit Tests Only
 ```bash
-pnpm test:unit
+npm run test:unit
 ```
 
 ### Integration Tests Only
 ```bash
-pnpm test:integration
+npm run test:integration
+```
+
+### End-to-End Tests Only
+```bash
+npm run test:e2e
 ```
 
 ### With Coverage Report
 ```bash
-pnpm test:coverage
+npm run test:coverage
 ```
 
 ### Watch Mode
 ```bash
-pnpm test:watch
+npm run test:watch
 ```
 
 ## Test Categories
@@ -87,6 +95,20 @@ pnpm test:watch
 - Device discovery workflow
 - Accessory creation and management
 - Error handling integration
+
+### End-to-End Tests
+
+#### Homebridge E2E Flow
+- Complete plugin initialization and registration
+- Platform and device discovery
+- Device communication (with mock server)
+- HomeKit service configuration
+- Error handling and recovery scenarios
+- Resource cleanup and management
+- State synchronization validation
+- Concurrent operations handling
+
+The E2E tests use a mock UDP server (`MockRabbitAirServer`) that simulates a RabbitAir device, allowing for testing of the complete integration flow without requiring physical hardware.
 
 ## Test Configuration
 
