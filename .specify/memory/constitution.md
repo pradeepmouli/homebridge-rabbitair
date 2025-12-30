@@ -1,16 +1,16 @@
-<!-- 
+<!--
   SYNC IMPACT REPORT
   ==================
   Version: 1.1.0 (Enhanced)
   Ratified: 2025-12-30
   Last Amended: 2025-12-30
-  
+
   Version 1.1.0 Changes:
   - Added comprehensive workflow selection guidelines for spec-kit commands
   - Defined quality gates for each workflow type (baseline, feature, bugfix, enhancement, etc.)
   - Expanded Development Workflow section with core and extension workflows
   - Established workflow-specific compliance requirements
-  
+
   Version 1.0.0 (Initial):
   - Introduced 5 core development principles aligned with user's TypeScript guidelines
   - Established testing-first discipline and HomeKit integration focus
@@ -157,7 +157,7 @@ Prohibited workflow misuse:
 
 **Constitution Authority**: This constitution supersedes all informal practices and style guides. All development decisions MUST be justified against these principles.
 
-**Amendment Procedure**: 
+**Amendment Procedure**:
 1. Propose amendment via GitHub issue with rationale and impact analysis.
 2. Require review approval from project maintainer.
 3. Document amendment reason, version bump (semantic versioning rules apply).
@@ -176,4 +176,4 @@ Prohibited workflow misuse:
 
 **Runtime Guidance**: Refer to `ts.instructions.md` for day-to-day coding style (camelCase, PascalCase, indentation, decorators, testing frameworks). Constitution defines non-negotiable project values; instructions define implementation mechanics.
 
-**Version**: 1.0.0 | **Ratified**: 2025-12-30 | **Last Amended**: 2025-12-30
+**Version**: 1.1.0 | **Ratified**: 2025-12-30 | **Last Amended**: 2025-12-30
