@@ -1,13 +1,24 @@
 {
-	"files.eol": "\n",
-	"editor.codeActionsOnSave": {
-		"source.fixAll.eslint": "explicit"
-	},
-	"editor.rulers": [
-		140
-	],
-	"eslint.enable": true,
-	"ColorfulMonorepo.arrange.init": true,
-	"typescript.tsdk": "node_modules/typescript/lib",
-	"typescript.experimental.useTsgo": false
+    "files.eol": "\n",
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit"
+    },
+    "editor.rulers": [
+        140
+    ],
+    "eslint.enable": true,
+    "ColorfulMonorepo.arrange.init": true,
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "typescript.experimental.useTsgo": false,
+    "chat.promptFilesRecommendations": {
+        "speckit.constitution": true,
+        "speckit.specify": true,
+        "speckit.plan": true,
+        "speckit.tasks": true,
+        "speckit.implement": true
+    },
+    "chat.tools.terminal.autoApprove": {
+        ".specify/scripts/bash/": true,
+        ".specify/scripts/powershell/": true
+    }
 }
