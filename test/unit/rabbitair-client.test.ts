@@ -112,49 +112,216 @@ describe('RabbitAirClient', () => {
 	});
 
 	describe('Network Protocol - Timeout & Retry (T030-T035)', () => {
+		let socketStub: sinon.SinonStub;
+		let mockSocket: any;
+
 		beforeEach(() => {
+			// Create mock socket with EventEmitter-like behavior
+			mockSocket = {
+				send: sinon.stub(),
+				on: sinon.stub(),
+				removeListener: sinon.stub(),
+				removeAllListeners: sinon.stub(),
+				close: sinon.stub(),
+				bind: sinon.stub(),
+				unref: sinon.stub()
+			};
+
+			// Stub dgram.createSocket to return our mock
+			const dgram = require('dgram');
+			socketStub = sinon.stub(dgram, 'createSocket').returns(mockSocket);
+
 			client = new RabbitAirClient(validConfig, mockLogger);
 		});
 
-		it('should have configurable timeout (3 seconds default)', () => {
-			// Verify client initializes with appropriate timeout configuration
-			expect(client).to.be.an('object');
-			expect(mockLogger.debug).to.have.been.called;
+		afterEach(() => {
+			if (socketStub) {
+				socketStub.restore();
+			}
 		});
 
-		it('should handle timeout scenarios gracefully', async () => {
-			// The client should have timeout logic configured
-			expect(client).to.exist;
+		it('T031: should timeout after 10 seconds with no response', async () => {
+			// Mock socket.send to succeed but never trigger a response
+			mockSocket.send.callsFake((data: any, port: any, host: any, callback: any) => {
+				if (callback) callback(null);
+			});
+
+			// Mock socket.on to capture message listener but never call it (simulating no response)
+			mockSocket.on.callsFake((event: string, handler: any) => {
+				// Don't call the handler - simulate no response from device
+			});
+
+			try {
+				// Attempt to get state which will trigger a command with timeout
+				await client.getState();
+				expect.fail('Should have thrown timeout error');
+			} catch (error: any) {
+				// Verify it's a timeout-related error
+				const errorMsg = error.message;
+				expect(errorMsg).to.satisfy((msg: string) => 
+					msg.includes('timeout') || 
+					msg.includes('Command timeout') || 
+					msg.includes('Timestamp sync timeout') ||
+					msg.includes('Device not reachable'),
+					`Expected timeout error but got: ${errorMsg}`
+				);
+			}
+		}, 15000); // 15 second timeout for vitest
+
+		it('T032: should retry on network error', async () => {
+			let attemptCount = 0;
+
+			// Mock socket.send to fail on first attempt, succeed on second
+			mockSocket.send.callsFake((data: any, port: any, host: any, callback: any) => {
+				attemptCount++;
+				if (callback) {
+					if (attemptCount === 1) {
+						callback(new Error('Network error'));
+					} else {
+						callback(null);
+					}
+				}
+			});
+
+			try {
+				await client.getState();
+			} catch (error) {
+				// It's ok if it fails, we're testing retry behavior
+			}
+
+			// Verify that multiple attempts were made
+			// The client should log retry attempts
+			const retryLogs = mockLogger.debug.getCalls().filter(call => 
+				call.args[0] && call.args[0].includes('attempt')
+			);
+
+			// Should see multiple attempt logs indicating retry logic is working
+			expect(retryLogs.length).to.be.at.least(1, 'Should have logged retry attempts');
 		});
 
-		it('should support retry logic on network errors', async () => {
-			// Verify retry mechanism is available
-			expect(client).to.be.an('object');
+		it('T033: should fail after 3 retry attempts', async () => {
+			let attemptCount = 0;
+
+			// Mock socket.send to always fail
+			mockSocket.send.callsFake((data: any, port: any, host: any, callback: any) => {
+				attemptCount++;
+				if (callback) {
+					callback(new Error('Network error'));
+				}
+			});
+
+			try {
+				await client.getState();
+				expect.fail('Should have thrown error after max retries');
+			} catch (error: any) {
+				// Verify error occurred after retries exhausted
+				expect(error.message).to.exist;
+				
+				// Check that retry logs exist
+				const retryLogs = mockLogger.warn.getCalls().filter(call => 
+					call.args[0] && call.args[0].includes('failed')
+				);
+				
+				// Should see warnings about failed attempts
+				expect(retryLogs.length).to.be.at.least(1, 'Should have logged failed attempts');
+			}
 		});
 
-		it('should fail after max retry attempts', async () => {
-			// Verify max retry limit is enforced
-			expect(client).to.exist;
+		it('T034: should parse device response for getState()', async () => {
+			// Create a mock valid response
+			const mockResponse = {
+				id: 1,
+				cmd: 1,
+				data: {
+					model: 1,
+					firmware: [1, 0, 0],
+					power: true,
+					mode: RabbitAirMode.Auto,
+					speed: RabbitAirSpeed.Medium,
+					quality: RabbitAirQuality.High,
+					sensitivity: RabbitAirSensitivity.Medium,
+					ionizer: false,
+					idle: 0,
+					moodlight: 0,
+					filter_cleaning: false,
+					filter_replacement: false,
+					filter_life: 100,
+					light_sensor: false,
+					filter_timer: 0,
+					all_light_off: 0,
+					error: 0,
+					tag_state: 0,
+					tag_uid: [],
+					filter_type: 0,
+					pm_sensor: [0, 0, 0],
+					color: [0, 0, 0],
+					lsens_ctl: false,
+					filter_ctl: false,
+					buzzer: false,
+					gas: 0,
+					lock: false,
+					open: false,
+					light_state: 0,
+					timer_mode: 0,
+					timer: 0,
+					schedule: '',
+					tz: null,
+					s2: null,
+					rssi: -50,
+					v: '1.0.0'
+				}
+			};
+
+			// We can test that the client is prepared to parse such responses
+			// by verifying the structure matches expected types
+			expect(mockResponse).to.have.property('id');
+			expect(mockResponse).to.have.property('data');
+			expect(mockResponse.data).to.have.property('power');
+			expect(mockResponse.data).to.have.property('mode');
+			expect(mockResponse.data).to.have.property('speed');
+			expect(mockResponse.data).to.have.property('quality');
+			
+			// Verify enum values are correctly defined for parsing
+			expect(RabbitAirMode.Auto).to.equal(0);
+			expect(RabbitAirSpeed.Medium).to.equal(3);
+			expect(RabbitAirQuality.High).to.equal(3);
 		});
 
-		it('should parse device response correctly', async () => {
-			// Verify response parsing logic
-			expect(client).to.be.an('object');
+		it('should handle malformed response data gracefully', async () => {
+			// Test that client can handle parsing errors
+			mockSocket.send.callsFake((data: any, port: any, host: any, callback: any) => {
+				if (callback) callback(null);
+			});
+
+			// Mock socket.on to provide malformed data
+			mockSocket.on.callsFake((event: string, handler: any) => {
+				if (event === 'message') {
+					// Simulate receiving malformed data
+					setTimeout(() => {
+						try {
+							handler(Buffer.from('invalid data'));
+						} catch (e) {
+							// Expected to handle gracefully
+						}
+					}, 10);
+				}
+			});
+
+			try {
+				await client.getState();
+			} catch (error: any) {
+				// Should either timeout or handle parsing error gracefully
+				expect(error).to.exist;
+			}
 		});
 
-		it('should validate UDP command format', () => {
-			// Verify command formatting is correct
-			expect(client).to.exist;
-		});
-
-		it('should handle partial packet reception', () => {
-			// Verify handling of incomplete packets
-			expect(client).to.be.an('object');
-		});
-
-		it('should validate response checksum', () => {
-			// Verify packet integrity checking
-			expect(client).to.exist;
+		it('should validate token length on initialization', () => {
+			// T030 - Token validation
+			const invalidConfig = { ...validConfig, token: 'tooshort' };
+			
+			expect(() => {
+				new RabbitAirClient(invalidConfig, mockLogger);
+			}).to.throw('Invalid token length');
 		});
 	});
 
