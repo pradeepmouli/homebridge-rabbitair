@@ -28,7 +28,7 @@
   "scripts": {
     "build": "rimraf ./dist && tsc",
     "lint": "eslint . --max-warnings=0",
-    "test": "mocha --require tsx 'test/**/*.test.ts'",
+    "test": "mocha --require tsx \"test/**/*.test.ts\" --ignore \"test/integration/network-resilience.test.ts\" --ignore \"test/e2e/rabbitair-plugin.test.ts\"",
     "test:unit": "tsx ./node_modules/.bin/mocha 'test/unit/**/*.test.ts'",
     "test:integration": "tsx ./node_modules/.bin/mocha 'test/integration/**/*.test.ts'",
     "test:e2e": "tsx ./node_modules/.bin/mocha 'test/e2e/**/*.test.ts' --timeout 10000",

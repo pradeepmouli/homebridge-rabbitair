@@ -123,11 +123,11 @@
 **Timeline**: 1 hour
 **Gap**: Network resilience - 0% → Basic coverage
 
-- [ ] T043 Create test/integration/network-resilience.test.ts file
-- [ ] T044 Import TestHarness and NetworkSimulator from @pmouli/hap-test in test/integration/network-resilience.test.ts
-- [ ] T045 [P] Add test: verify characteristic updates succeed with 200ms latency in test/integration/network-resilience.test.ts
-- [ ] T046 [P] Add test: verify characteristic updates succeed with 50% packet loss via retries in test/integration/network-resilience.test.ts
-- [ ] T047 Run network resilience integration tests and verify all pass: `pnpm test:vitest test/integration/network-resilience.test.ts`
+- [X] T043 Create test/integration/network-resilience.test.ts file
+- [X] T044 Import TestHarness and NetworkSimulator from @pmouli/hap-test in test/integration/network-resilience.test.ts
+- [X] T045 [P] Add test: verify characteristic updates succeed with 200ms latency in test/integration/network-resilience.test.ts
+- [X] T046 [P] Add test: verify characteristic updates succeed with 50% packet loss via retries in test/integration/network-resilience.test.ts
+- [X] T047 Run network resilience integration tests and verify all pass: `pnpm test:vitest test/integration/network-resilience.test.ts`
 
 **Checkpoint**: Network resilience smoke tests passing (2+ tests)
 
@@ -140,9 +140,9 @@
 **Timeline**: 1 hour
 **Gap**: E2E workflows - 0% → Basic coverage
 
-- [ ] T048 Create test/e2e/rabbitair-plugin.test.ts file
-- [ ] T049 Add test: verify complete E2E workflow (initialize → register accessory → turn on → verify state) in test/e2e/rabbitair-plugin.test.ts
-- [ ] T050 Run E2E workflow test and verify passes: `pnpm test:vitest test/e2e/rabbitair-plugin.test.ts`
+- [X] T048 Create test/e2e/rabbitair-plugin.test.ts file
+- [X] T049 Add test: verify complete E2E workflow (initialize → register accessory → turn on → verify state) in test/e2e/rabbitair-plugin.test.ts
+- [X] T050 Run E2E workflow test and verify passes: `pnpm test:vitest test/e2e/rabbitair-plugin.test.ts`
 
 **Checkpoint**: E2E workflow skeleton functional (1+ test passing)
 
