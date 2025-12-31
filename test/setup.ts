@@ -1,8 +1,5 @@
-import * as chai from 'chai';
-import sinonChai from 'sinon-chai';
-import chaiAsPromised from 'chai-as-promised';
+// Vitest setup file
+// Vitest provides globals like describe, it, expect, vi automatically when globals: true is set
+import { expect } from 'vitest';
 
-chai.use(sinonChai);
-chai.use(chaiAsPromised);
-
-export default chai;
+export { expect };

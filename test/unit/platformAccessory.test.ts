@@ -1,45 +1,39 @@
-import { expect, use } from 'chai';
-import chaiAsPromised from 'chai-as-promised';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { API, Characteristic, Logger, PlatformAccessory, Service } from 'homebridge';
-import sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 import { RabbitAirPlatform } from '../../src/platform.js';
 import { RabbitAirAccessory } from '../../src/platformAccessory.js';
 import { RabbitAirClient, RabbitAirMode, RabbitAirSpeed } from '../../src/rabbitair-client.js';
 
-use(chaiAsPromised);
-use(sinonChai);
-
 describe('RabbitAirAccessory', () => {
-	let mockPlatform: sinon.SinonStubbedInstance<RabbitAirPlatform>;
-	let mockPlatformAccessory: sinon.SinonStubbedInstance<PlatformAccessory>;
-	let mockService: sinon.SinonStubbedInstance<Service>;
-	let mockLogger: sinon.SinonStubbedInstance<Logger>;
-	let mockClient: sinon.SinonStubbedInstance<RabbitAirClient>;
-	let rabbitAirClientStub: sinon.SinonStub;
+	let mockPlatform: any;
+	let mockPlatformAccessory: any;
+	let mockService: any;
+	let mockLogger: Logger;
+	let mockClient: any;
+	let rabbitAirClientStub: any;
 
 	beforeEach(() => {
 		// Mock logger
 		mockLogger = {
-			debug: sinon.stub(),
-			info: sinon.stub(),
-			warn: sinon.stub(),
-			error: sinon.stub(),
-			log: sinon.stub()
-		} as sinon.SinonStubbedInstance<Logger>;
+			debug: vi.fn(),
+			info: vi.fn(),
+			warn: vi.fn(),
+			error: vi.fn(),
+			log: vi.fn()
+		} as unknown as Logger;
 
 		// Mock service with proper characteristics
 		mockService = {
-			setCharacteristic: sinon.stub().returnsThis(),
-			getCharacteristic: sinon.stub().returnsThis(),
-			onSet: sinon.stub().returnsThis(),
-			onGet: sinon.stub().returnsThis(),
-			setProps: sinon.stub().returnsThis(),
-			updateCharacteristic: sinon.stub().returnsThis(),
+			setCharacteristic: vi.fn().mockReturnThis(),
+			getCharacteristic: vi.fn().mockReturnThis(),
+			onSet: vi.fn().mockReturnThis(),
+			onGet: vi.fn().mockReturnThis(),
+			setProps: vi.fn().mockReturnThis(),
+			updateCharacteristic: vi.fn().mockReturnThis(),
 			characteristics: [], // hap-fluent expects this to be an array
-			addCharacteristic: sinon.stub().returnsThis(),
-			removeCharacteristic: sinon.stub().returnsThis(),
-			testCharacteristic: sinon.stub().returnsThis()
+			addCharacteristic: vi.fn().mockReturnThis(),
+			removeCharacteristic: vi.fn().mockReturnThis(),
+			testCharacteristic: vi.fn().mockReturnThis()
 		} as any;
 
 		// Create multiple service instances for different service types with proper characteristics arrays
@@ -84,16 +78,16 @@ describe('RabbitAirAccessory', () => {
 				mockAccessoryInfoService,
 				mockFilterMaintenanceService
 			],
-			getService: sinon.stub().callsFake((serviceType) => {
+			getService: vi.fn().mockImplementation((serviceType) => {
 				if (serviceType === 'AirPurifier') return mockAirPurifierService;
 				if (serviceType === 'AirQualitySensor') return mockAirQualityService;
 				if (serviceType === 'AccessoryInformation') return mockAccessoryInfoService;
 				if (serviceType === 'FilterMaintenance') return mockFilterMaintenanceService;
 				return mockService;
 			}),
-			addService: sinon.stub().returns(mockService),
-			removeService: sinon.stub(),
-			getServiceById: sinon.stub().returns(mockService),
+			addService: vi.fn().mockReturnValue(mockService),
+			removeService: vi.fn(),
+			getServiceById: vi.fn().mockReturnValue(mockService),
 			UUID: 'test-uuid',
 			displayName: 'Test Air Purifier'
 		} as any;
@@ -148,13 +142,13 @@ describe('RabbitAirAccessory', () => {
 				}
 			} as any,
 			config: {},
-			registerPlatformAccessories: sinon.stub(),
-			unregisterPlatformAccessories: sinon.stub()
+			registerPlatformAccessories: vi.fn(),
+			unregisterPlatformAccessories: vi.fn()
 		} as any;
 
 		// Mock RabbitAirClient
 		mockClient = {
-			getState: sinon.stub().resolves({
+			getState: vi.fn().mockResolvedValue({
 				power: false,
 				mode: RabbitAirMode.Manual,
 				speed: RabbitAirSpeed.Medium,
@@ -167,27 +161,27 @@ describe('RabbitAirAccessory', () => {
 				error: 0,
 				idle: 0
 			}),
-			setState: sinon.stub().resolves(),
-			shutdown: sinon.stub().resolves(),
-			cleanup: sinon.stub().resolves()
+			setState: vi.fn().mockResolvedValue(undefined),
+			shutdown: vi.fn().mockResolvedValue(undefined),
+			cleanup: vi.fn().mockResolvedValue(undefined)
 		} as any;
 
 		// Stub the RabbitAirClient constructor to return our mock
-		rabbitAirClientStub = sinon.stub(RabbitAirClient.prototype, 'constructor' as any).callsFake(function () {
+		rabbitAirClientStub = vi.spyOn(RabbitAirClient.prototype, 'constructor' as any).mockImplementation(function () {
 			Object.assign(this, mockClient);
 		});
 	});
 
 	afterEach(() => {
-		sinon.restore();
+		vi.restoreAllMocks();
 	});
 
 	describe('constructor', () => {
 		it('should initialize accessory with valid configuration', () => {
 			// Since the AccessoryHandler constructor is complex to mock,
 			// we'll test that the class can be imported and the constructor exists
-			expect(RabbitAirAccessory).to.be.a('function');
-			expect(RabbitAirAccessory.name).to.equal('RabbitAirAccessory');
+			expect(RabbitAirAccessory).toBeTypeOf('function');
+			expect(RabbitAirAccessory.name).toBe('RabbitAirAccessory');
 		});
 	});
 
@@ -221,8 +215,8 @@ describe('RabbitAirAccessory', () => {
 		describe('getActive', () => {
 			it('should return current active state', async () => {
 				const result = await mockAccessoryInstance.getActive();
-				expect(result).to.be.a('boolean');
-				expect(mockLogger.debug).to.have.been.called;
+				expect(result).toBeTypeOf('boolean');
+				expect(mockLogger.debug).toHaveBeenCalled();
 			});
 		});
 
@@ -231,23 +225,23 @@ describe('RabbitAirAccessory', () => {
 				await mockAccessoryInstance.setActive(true);
 
 				// Verify logger was called and client.setState was called
-				expect(mockLogger.debug).to.have.been.called;
-				expect(mockClient.setState).to.have.been.calledWith({ power: true });
+				expect(mockLogger.debug).toHaveBeenCalled();
+				expect(mockClient.setState).toHaveBeenCalledWith({ power: true });
 			});
 
 			it('should set active state to false', async () => {
 				await mockAccessoryInstance.setActive(false);
 
 				// Verify logger was called and client.setState was called
-				expect(mockLogger.debug).to.have.been.called;
-				expect(mockClient.setState).to.have.been.calledWith({ power: false });
+				expect(mockLogger.debug).toHaveBeenCalled();
+				expect(mockClient.setState).toHaveBeenCalledWith({ power: false });
 			});
 		});
 
 		describe('getRotationSpeed', () => {
 			it('should return current rotation speed', async () => {
 				const result = await mockAccessoryInstance.getRotationSpeed();
-				expect(result).to.be.a('number');
+				expect(result).toBeTypeOf('number');
 			});
 		});
 
@@ -258,8 +252,8 @@ describe('RabbitAirAccessory', () => {
 				await mockAccessoryInstance.setRotationSpeed(testSpeed);
 
 				// Verify logger was called and client.setState was called
-				expect(mockLogger.debug).to.have.been.called;
-				expect(mockClient.setState).to.have.been.calledWith({ speed: testSpeed });
+				expect(mockLogger.debug).toHaveBeenCalled();
+				expect(mockClient.setState).toHaveBeenCalledWith({ speed: testSpeed });
 			});
 		});
 	});
@@ -275,7 +269,7 @@ describe('RabbitAirAccessory', () => {
 				client: mockClient,
 				updateInterval: null,
 				initialUpdateTimeout: null,
-				stopPeriodicUpdates: sinon.stub()
+				stopPeriodicUpdates: vi.fn()
 			};
 
 			// Bind the cleanup method
@@ -283,17 +277,17 @@ describe('RabbitAirAccessory', () => {
 		});
 
 		it('should cleanup resources without throwing', async () => {
-			await expect(mockAccessoryInstance.cleanup()).to.not.be.rejected;
-			expect(mockLogger.debug).to.have.been.called;
-			expect(mockClient.shutdown).to.have.been.called;
+			await expect(mockAccessoryInstance.cleanup()).resolves.not.toThrow();
+			expect(mockLogger.debug).toHaveBeenCalled();
+			expect(mockClient.shutdown).toHaveBeenCalled();
 		});
 
 		it('should handle cleanup errors gracefully', async () => {
 			// Make the client.shutdown reject
-			mockClient.shutdown.rejects(new Error('Cleanup failed'));
+			mockClient.shutdown.mockRejectedValue(new Error('Cleanup failed'));
 
-			await expect(mockAccessoryInstance.cleanup()).to.not.be.rejected;
-			expect(mockLogger.error).to.have.been.called;
+			await expect(mockAccessoryInstance.cleanup()).resolves.not.toThrow();
+			expect(mockLogger.error).toHaveBeenCalled();
 		});
 	});
 });

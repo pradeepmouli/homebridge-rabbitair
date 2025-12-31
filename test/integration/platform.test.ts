@@ -1,17 +1,16 @@
-import { expect } from 'chai';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { API, Characteristic, Logger, PlatformAccessory, Service, type Logging } from 'homebridge';
-import sinon from 'sinon';
 import { RabbitAirPlatform } from '../../src/platform.js';
 import { RabbitAirAccessory } from '../../src/platformAccessory.js';
 import { RabbitAirClient } from '../../src/rabbitair-client.js';
 
 describe('Homebridge Platform Integration', () => {
 	let platform: RabbitAirPlatform;
-	let mockApi: sinon.SinonStubbedInstance<API>;
-	let mockLogger: sinon.SinonStubbedInstance<Logging>;
-	let mockAccessory: sinon.SinonStubbedInstance<PlatformAccessory>;
-	let mockService: sinon.SinonStubbedInstance<Service>;
-	let clientStub: sinon.SinonStub;
+	let mockApi: any;
+	let mockLogger: Logging;
+	let mockAccessory: any;
+	let mockService: any;
+	let clientStub: any;
 
 	const testConfig = {
 		platform: 'RabbitAir',
@@ -27,21 +26,21 @@ describe('Homebridge Platform Integration', () => {
 
 	beforeEach(() => {
 		mockLogger = {
-			debug: sinon.stub(),
-			info: sinon.stub(),
-			warn: sinon.stub(),
-			error: sinon.stub(),
-			log: sinon.stub()
-		} as sinon.SinonStubbedInstance<Logging>;
+			debug: vi.fn(),
+			info: vi.fn(),
+			warn: vi.fn(),
+			error: vi.fn(),
+			log: vi.fn()
+		} as unknown as Logging;
 
 		mockService = {
 			characteristics: [],
-			setCharacteristic: sinon.stub().returnsThis(),
-			getCharacteristic: sinon.stub().returnsThis(),
-			onSet: sinon.stub().returnsThis(),
-			onGet: sinon.stub().returnsThis(),
-			setProps: sinon.stub().returnsThis(),
-			updateCharacteristic: sinon.stub().returnsThis()
+			setCharacteristic: vi.fn().mockReturnThis(),
+			getCharacteristic: vi.fn().mockReturnThis(),
+			onSet: vi.fn().mockReturnThis(),
+			onGet: vi.fn().mockReturnThis(),
+			setProps: vi.fn().mockReturnThis(),
+			updateCharacteristic: vi.fn().mockReturnThis()
 		} as any;
 
 		mockAccessory = {
@@ -51,19 +50,19 @@ describe('Homebridge Platform Integration', () => {
 				device: testConfig.devices[0]
 			},
 			services: [],
-			getService: sinon.stub().returns(mockService),
-			addService: sinon.stub().callsFake((service) => {
+			getService: vi.fn().mockReturnValue(mockService),
+			addService: vi.fn().mockImplementation((service) => {
 				mockAccessory.services.push(service);
 				return service;
 			}),
-			removeService: sinon.stub()
+			removeService: vi.fn()
 		} as any;
 
 		mockApi = {
-			on: sinon.stub(),
+			on: vi.fn(),
 			hap: {
 				uuid: {
-					generate: sinon.stub().returns('test-uuid-1234')
+					generate: vi.fn().mockReturnValue('test-uuid-1234')
 				},
 				Service: {
 					AccessoryInformation: class MockAccessoryInformation {
@@ -120,48 +119,48 @@ describe('Homebridge Platform Integration', () => {
 					SERVICE_COMMUNICATION_FAILURE: -70402
 				}
 			},
-			platformAccessory: sinon.stub().returns(mockAccessory),
-			registerPlatformAccessories: sinon.stub(),
-			unregisterPlatformAccessories: sinon.stub(),
-			updatePlatformAccessories: sinon.stub()
+			platformAccessory: vi.fn().mockReturnValue(mockAccessory),
+			registerPlatformAccessories: vi.fn(),
+			unregisterPlatformAccessories: vi.fn(),
+			updatePlatformAccessories: vi.fn()
 		} as any;
 
 		// Mock RabbitAirClient
-		clientStub = sinon.stub(RabbitAirClient.prototype, 'constructor' as any);
-		sinon.stub(RabbitAirClient.prototype, 'getState').resolves({
+		clientStub = vi.spyOn(RabbitAirClient.prototype, 'constructor' as any);
+		vi.spyOn(RabbitAirClient.prototype, 'getState').mockResolvedValue({
 			power: true,
 			mode: 0,
 			speed: 2,
 			quality: 2
-		});
-		sinon.stub(RabbitAirClient.prototype, 'setState').resolves();
-		sinon.stub(RabbitAirClient.prototype, 'shutdown').resolves();
+		} as any);
+		vi.spyOn(RabbitAirClient.prototype, 'setState').mockResolvedValue(undefined);
+		vi.spyOn(RabbitAirClient.prototype, 'shutdown').mockResolvedValue(undefined);
 	});
 
 	afterEach(() => {
-		sinon.restore();
+		vi.restoreAllMocks();
 	});
 
 	describe('full platform lifecycle', () => {
 		it('should initialize platform and discover devices', async () => {
 			platform = new RabbitAirPlatform(mockLogger, testConfig, mockApi);
 
-			expect(platform).to.be.instanceOf(RabbitAirPlatform);
-			expect(mockApi.on).to.have.been.calledWith('didFinishLaunching');
+			expect(platform).toBeInstanceOf(RabbitAirPlatform);
+			expect(mockApi.on).toHaveBeenCalledWith('didFinishLaunching', expect.any(Function));
 
 			// Simulate the didFinishLaunching event
-			const callback = mockApi.on.getCall(0).args[1];
+			const callback = mockApi.on.mock.calls[0][1];
 			callback();
 
-			expect(mockLogger.debug).to.have.been.called;
+			expect(mockLogger.debug).toHaveBeenCalled();
 		});
 
 		it('should create accessories for configured devices', () => {
 			platform = new RabbitAirPlatform(mockLogger, testConfig, mockApi);
 			platform.discoverDevices();
 
-			expect(mockApi.registerPlatformAccessories).to.have.been.calledOnce;
-			expect(mockApi.hap.uuid.generate).to.have.been.called;
+			expect(mockApi.registerPlatformAccessories).toHaveBeenCalledOnce();
+			expect(mockApi.hap.uuid.generate).toHaveBeenCalled();
 		});
 
 		it('should handle cached accessory restoration', () => {
@@ -170,8 +169,8 @@ describe('Homebridge Platform Integration', () => {
 			// Simulate cached accessory
 			platform.configureAccessory(mockAccessory);
 
-			expect(platform.accessories.size).to.equal(1);
-			expect(platform.accessories.get(mockAccessory.UUID)).to.equal(mockAccessory);
+			expect(platform.accessories.size).toBe(1);
+			expect(platform.accessories.get(mockAccessory.UUID)).toBe(mockAccessory);
 		});
 	});
 
@@ -185,23 +184,23 @@ describe('Homebridge Platform Integration', () => {
 		it('should create accessory instance without errors', () => {
 			expect(() => {
 				accessory = new RabbitAirAccessory(platform, mockAccessory);
-			}).to.not.throw();
+			}).not.toThrow();
 		});
 
 		it('should setup all required services and characteristics', () => {
 			accessory = new RabbitAirAccessory(platform, mockAccessory);
 
 			// Should setup accessory information - hap-fluent calls getService with service constructors
-			expect(mockAccessory.getService).to.have.been.calledWith(sinon.match.has('name', 'AccessoryInformation'));
+			expect(mockAccessory.getService).toHaveBeenCalledWith(expect.objectContaining({ name: 'AccessoryInformation' }));
 
 			// Should setup air purifier service
-			expect(mockAccessory.getService).to.have.been.calledWith(sinon.match.has('name', 'AirPurifier'));
+			expect(mockAccessory.getService).toHaveBeenCalledWith(expect.objectContaining({ name: 'AirPurifier' }));
 
 			// Should setup air quality sensor service
-			expect(mockAccessory.getService).to.have.been.calledWith(sinon.match.has('name', 'AirQualitySensor'));
+			expect(mockAccessory.getService).toHaveBeenCalledWith(expect.objectContaining({ name: 'AirQualitySensor' }));
 
 			// Should setup filter maintenance service
-			expect(mockAccessory.getService).to.have.been.calledWith(sinon.match.has('name', 'FilterMaintenance'));
+			expect(mockAccessory.getService).toHaveBeenCalledWith(expect.objectContaining({ name: 'FilterMaintenance' }));
 		});
 
 		afterEach(async () => {
@@ -214,12 +213,14 @@ describe('Homebridge Platform Integration', () => {
 	describe('error handling integration', () => {
 		it('should handle client connection failures gracefully', () => {
 			// Mock client to throw on construction
-			clientStub.throws(new Error('Connection failed'));
+			clientStub.mockImplementation(() => {
+				throw new Error('Connection failed');
+			});
 
 			expect(() => {
 				platform = new RabbitAirPlatform(mockLogger, testConfig, mockApi);
 				platform.discoverDevices();
-			}).to.not.throw();
+			}).not.toThrow();
 		});
 
 		it('should handle invalid configurations gracefully', () => {
@@ -237,7 +238,7 @@ describe('Homebridge Platform Integration', () => {
 			platform = new RabbitAirPlatform(mockLogger, invalidConfig, mockApi);
 			platform.discoverDevices();
 
-			expect(mockLogger.error).to.have.been.called;
+			expect(mockLogger.error).toHaveBeenCalled();
 		});
 	});
 });
