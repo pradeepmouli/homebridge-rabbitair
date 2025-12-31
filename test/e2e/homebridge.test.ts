@@ -145,7 +145,7 @@ describe('Homebridge RabbitAir E2E Flow', () => {
 			plugin.default(mockApi);
 
 			expect(mockApi.registerPlatform).toHaveBeenCalledOnce();
-			expect(mockApi.registerPlatform).toHaveBeenCalledWith('RabbitAir');
+			expect(mockApi.registerPlatform).toHaveBeenCalledWith('RabbitAir', expect.any(Function));
 		});
 
 		it('should create platform instance with configuration', () => {
@@ -160,7 +160,7 @@ describe('Homebridge RabbitAir E2E Flow', () => {
 			platform = new RabbitAirPlatform(mockLogger, platformConfig, mockApi);
 
 			// Verify callback was registered
-			expect(mockApi.on).toHaveBeenCalledWith('didFinishLaunching');
+			expect(mockApi.on).toHaveBeenCalledWith('didFinishLaunching', expect.any(Function));
 		});
 	});
 
@@ -211,7 +211,7 @@ describe('Homebridge RabbitAir E2E Flow', () => {
 			platform = new RabbitAirPlatform(mockLogger, platformConfig, mockApi);
 
 			// Get the didFinishLaunching callback
-			const callback = mockApi.on.getCall(0).args[1];
+			const callback = mockApi.on.mock.calls[0][1];
 			
 			// Trigger device discovery
 			callback();
@@ -248,7 +248,7 @@ describe('Homebridge RabbitAir E2E Flow', () => {
 			platform = new RabbitAirPlatform(mockLogger, multiDeviceConfig, mockApi);
 			
 			// Get and trigger the callback
-			const callback = mockApi.on.getCall(0).args[1];
+			const callback = mockApi.on.mock.calls[0][1];
 			callback();
 
 			setTimeout(() => {
@@ -268,8 +268,8 @@ describe('Homebridge RabbitAir E2E Flow', () => {
 				context: {
 					device: platformConfig.devices![0]
 				},
-				getService: sinon.stub(),
-				addService: sinon.stub()
+				getService: vi.fn(),
+				addService: vi.fn()
 			} as any;
 
 			// Configure cached accessory
@@ -323,7 +323,7 @@ describe('Homebridge RabbitAir E2E Flow', () => {
 			platform = new RabbitAirPlatform(mockLogger, invalidConfig, mockApi);
 
 			// Get and trigger the callback
-			const callback = mockApi.on.getCall(0).args[1];
+			const callback = mockApi.on.mock.calls[0][1];
 			callback();
 
 			setTimeout(() => {
@@ -343,7 +343,7 @@ describe('Homebridge RabbitAir E2E Flow', () => {
 			platform = new RabbitAirPlatform(mockLogger, noDevicesConfig, mockApi);
 
 			// Get and trigger the callback
-			const callback = mockApi.on.getCall(0).args[1];
+			const callback = mockApi.on.mock.calls[0][1];
 			callback();
 
 			setTimeout(() => {
@@ -361,7 +361,7 @@ describe('Homebridge RabbitAir E2E Flow', () => {
 			platform = new RabbitAirPlatform(mockLogger, platformConfig, mockApi);
 
 			// Get and trigger the callback
-			const callback = mockApi.on.getCall(0).args[1];
+			const callback = mockApi.on.mock.calls[0][1];
 			callback();
 
 			// Wait for setup

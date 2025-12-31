@@ -119,14 +119,20 @@ describe('Homebridge Platform Integration', () => {
 					SERVICE_COMMUNICATION_FAILURE: -70402
 				}
 			},
-			platformAccessory: vi.fn().mockReturnValue(mockAccessory),
+			platformAccessory: class {
+				constructor() {
+					return mockAccessory;
+				}
+			},
 			registerPlatformAccessories: vi.fn(),
 			unregisterPlatformAccessories: vi.fn(),
 			updatePlatformAccessories: vi.fn()
 		} as any;
 
 		// Mock RabbitAirClient
-		clientStub = vi.spyOn(RabbitAirClient.prototype, 'constructor' as any);
+		clientStub = vi.spyOn(RabbitAirClient.prototype, 'constructor' as any).mockImplementation(() => {
+			return undefined as any;
+		});
 		vi.spyOn(RabbitAirClient.prototype, 'getState').mockResolvedValue({
 			power: true,
 			mode: 0,

@@ -54,14 +54,21 @@ describe('RabbitAirPlatform', () => {
 				Service: {},
 				Characteristic: {}
 			},
-			platformAccessory: vi.fn().mockReturnValue(mockAccessory),
+			platformAccessory: class {
+				constructor() {
+					return mockAccessory;
+				}
+			},
 			registerPlatformAccessories: vi.fn(),
 			unregisterPlatformAccessories: vi.fn(),
 			updatePlatformAccessories: vi.fn()
 		} as any;
 
-		// Stub the RabbitAirAccessory constructor
-		accessoryConstructorStub = vi.spyOn(RabbitAirAccessory.prototype, 'constructor' as any);
+		// Stub the RabbitAirAccessory constructor to prevent actual initialization
+		accessoryConstructorStub = vi.spyOn(RabbitAirAccessory.prototype, 'constructor' as any).mockImplementation(() => {
+			// Return undefined to allow instantiation to complete
+			return undefined as any;
+		});
 
 		// Stub RabbitAirClient methods
 		vi.spyOn(RabbitAirClient.prototype, 'connect').mockResolvedValue(undefined);
