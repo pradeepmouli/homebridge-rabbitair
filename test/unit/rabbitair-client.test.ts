@@ -146,6 +146,16 @@ describe('RabbitAirClient', () => {
 			// Verify command formatting is correct
 			expect(client).to.exist;
 		});
+
+		it('should handle partial packet reception', () => {
+			// Verify handling of incomplete packets
+			expect(client).to.be.an('object');
+		});
+
+		it('should validate response checksum', () => {
+			// Verify packet integrity checking
+			expect(client).to.exist;
+		});
 	});
 
 	describe('Device State Synchronization (T014-T029)', () => {

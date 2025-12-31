@@ -1,4 +1,3 @@
-import { describe, it, expect as vitestExpect, beforeEach, afterEach } from 'vitest';
 import { expect, use } from 'chai';
 import { Logger } from 'homebridge';
 import sinon from 'sinon';

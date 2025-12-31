@@ -1,4 +1,3 @@
-import { describe, it, expect as vitestExpect, beforeEach, afterEach } from 'vitest';
 import { expect, use } from 'chai';
 import { Logger } from 'homebridge';
 import sinon from 'sinon';
@@ -11,7 +10,7 @@ use(sinonChai);
 /**
  * Integration Tests: Network Resilience
  * Tests for latency, packet loss, and disconnection scenarios
- * 
+ *
  * Note: These are smoke tests that verify the client can handle network stress.
  * In production, use @pmouli/hap-test's NetworkSimulator for comprehensive testing.
  */
