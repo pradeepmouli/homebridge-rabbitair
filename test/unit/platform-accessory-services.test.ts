@@ -1,5 +1,6 @@
 import '../setup.js';
-import { expect } from 'chai';
+import { expect, describe, it, beforeEach, afterEach, vi } from 'vitest';
+import sinon from 'sinon';
 import sinon from 'sinon';
 import { TestHarness } from '@pmouli/hap-test';
 import type { PlatformAccessory } from 'homebridge';

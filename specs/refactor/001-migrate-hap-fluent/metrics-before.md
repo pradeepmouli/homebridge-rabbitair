@@ -1,8 +1,8 @@
 # Metrics Captured Before Refactoring
 
-**Timestamp**: Tue Dec 30 16:17:40 EST 2025
-**Git Commit**: df193ae
-**Branch**: refactor/001-migrate-hap-fluent
+**Timestamp**: Wed Dec 31 14:13:00 EST 2025
+**Git Commit**: 3fa92de
+**Branch**: latest
 
 ---
 
@@ -18,9 +18,15 @@ Manual count needed (cloc not installed):
 
 ## Test Coverage
 
-Coverage data not found. Run tests with coverage:
-```bash
-npm run test:coverage  # or equivalent command
+Coverage captured via `pnpm test:coverage` (Mocha + c8):
+
+```
+All files             |   50.96 |    80.95 |   72.34 |   50.96
+ index.ts             |  100.00 |   100.00 |  100.00 |  100.00
+ platform.ts          |   97.88 |    88.88 |  100.00 |   97.88
+ platformAccessory.ts |   67.11 |    83.33 |   94.73 |   67.11
+ rabbitair-client.ts  |   34.76 |    72.50 |   42.85 |   34.76
+ settings.ts          |  100.00 |   100.00 |  100.00 |  100.00
 ```
 
 ## Performance
@@ -34,13 +40,13 @@ npm run test:coverage  # or equivalent command
 ## Dependencies
 
 - **Direct Dependencies**: 4
-- **Dev Dependencies**: 24
+- **Dev Dependencies**: 27
 - **Total Installed**: 338
 
 ## Test Suite
 
-- **Test Files**:        0
-- **Test Pass Rate**: Run `npm test` to verify 100%
+- **Test Files**:        118 passing, 2 pending (Mocha); 125 tests (Vitest) all passing, 2 skipped
+- **Test Pass Rate**: Mocha suite passes with pending cases; Vitest suite 100% pass (skipped: 2)
 
 ## Git Statistics
 
@@ -48,7 +54,7 @@ npm run test:coverage  # or equivalent command
 
 ## Summary
 
-Metrics captured before refactoring at Tue Dec 30 16:17:41 EST 2025.
+Metrics captured before refactoring at Wed Dec 31 14:13:00 EST 2025.
 
 ---
 *Metrics captured using measure-metrics.sh*

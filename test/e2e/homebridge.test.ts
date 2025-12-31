@@ -1,5 +1,5 @@
 import '../setup.js';
-import { expect } from 'chai';
+import { expect, describe, it, beforeEach, afterEach, vi } from 'vitest';
 import type { API, Logging, PlatformConfig, PlatformAccessory, Service } from 'homebridge';
 import sinon from 'sinon';
 import { RabbitAirPlatform } from '../../src/platform.js';
@@ -8,7 +8,7 @@ import { RabbitAirClient } from '../../src/rabbitair-client.js';
 
 /**
  * End-to-End Tests for Homebridge RabbitAir Plugin
- * 
+ *
  * These tests validate the complete integration flow:
  * 1. Homebridge platform initialization
  * 2. Device discovery and registration
@@ -214,13 +214,13 @@ describe('Homebridge RabbitAir E2E Flow', () => {
 
 			// Get the didFinishLaunching callback
 			const callback = mockApi.on.getCall(0).args[1];
-			
+
 			// Trigger device discovery
 			callback();
 
 			// Wait for discovery and registration
 			await new Promise(resolve => setTimeout(resolve, 300));
-			
+
 			// Verify platform attempted to register accessories
 			// Note: May not register if device connection fails, but should not throw
 			expect(platform.accessories).to.exist;
@@ -247,13 +247,13 @@ describe('Homebridge RabbitAir E2E Flow', () => {
 			};
 
 			platform = new RabbitAirPlatform(mockLogger, multiDeviceConfig, mockApi);
-			
+
 			// Get and trigger the callback
 			const callback = mockApi.on.getCall(0).args[1];
 			callback();
 
 			await new Promise(resolve => setTimeout(resolve, 300));
-			
+
 			// Platform should handle multiple devices
 			expect(platform).to.exist;
 		});
@@ -328,7 +328,7 @@ describe('Homebridge RabbitAir E2E Flow', () => {
 			callback();
 
 			await new Promise(resolve => setTimeout(resolve, 200));
-			
+
 			// Should log error for invalid config
 			expect(mockLogger.error).to.have.been.called;
 		});
@@ -347,7 +347,7 @@ describe('Homebridge RabbitAir E2E Flow', () => {
 			callback();
 
 			await new Promise(resolve => setTimeout(resolve, 200));
-			
+
 			// Should log warning for no devices
 			expect(mockLogger.warn).to.have.been.called;
 		});

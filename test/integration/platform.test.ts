@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { expect, describe, it, beforeEach, afterEach, vi } from 'vitest';
 import { API, Characteristic, Logger, PlatformAccessory, Service, type Logging } from 'homebridge';
 import sinon from 'sinon';
 import { RabbitAirPlatform } from '../../src/platform.js';

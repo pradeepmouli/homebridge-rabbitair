@@ -1,20 +1,17 @@
-import { expect, use } from 'chai';
+import { expect, describe, it, beforeEach, afterEach, vi } from 'vitest';
 import { API, Logger, PlatformAccessory, type Logging } from 'homebridge';
-import sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 import { RabbitAirPlatform, type RabbitAirPlatformConfig } from '../../src/platform.js';
 import { RabbitAirAccessory } from '../../src/platformAccessory.js';
 import { RabbitAirClient } from '../../src/rabbitair-client.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from '../../src/settings.js';
 
-use(sinonChai);
+
 
 describe('RabbitAirPlatform', () => {
 	let platform: RabbitAirPlatform;
-	let mockApi: sinon.SinonStubbedInstance<API>;
-	let mockLogger: sinon.SinonStubbedInstance<Logging> & { prefix: string; };
-	let mockAccessory: sinon.SinonStubbedInstance<PlatformAccessory>;
-	let accessoryConstructorStub: sinon.SinonStub;
+	let mockApi: any;
+	let mockLogger: Logging & { prefix: string; };
+	let mockAccessory: any;
 
 	const validConfig: RabbitAirPlatformConfig = {
 		platform: PLATFORM_NAME,
@@ -31,67 +28,64 @@ describe('RabbitAirPlatform', () => {
 
 	beforeEach(() => {
 		mockLogger = {
-			debug: sinon.stub(),
-			info: sinon.stub(),
-			warn: sinon.stub(),
-			error: sinon.stub(),
-			log: sinon.stub(),
+			debug: vi.fn(),
+			info: vi.fn(),
+			warn: vi.fn(),
+			error: vi.fn(),
+			log: vi.fn(),
 			prefix: '<PREFIX>'
-		} as sinon.SinonStubbedInstance<Logging> & { prefix: string; };
+		} as unknown as Logging & { prefix: string; };
 
 		mockAccessory = {
 			UUID: 'test-uuid-1234',
 			displayName: 'Test Air Purifier',
 			context: {},
 			services: [],
-			addService: sinon.stub(),
-			getService: sinon.stub(),
-			removeService: sinon.stub()
+			addService: vi.fn(),
+			getService: vi.fn(),
+			removeService: vi.fn()
 		} as any;
 
 		mockApi = {
-			on: sinon.stub(),
+			on: vi.fn(),
 			hap: {
 				uuid: {
-					generate: sinon.stub().returns('test-uuid-1234')
+					generate: vi.fn().mockReturnValue('test-uuid-1234')
 				},
 				Service: {},
 				Characteristic: {}
 			},
-			platformAccessory: sinon.stub().returns(mockAccessory),
-			registerPlatformAccessories: sinon.stub(),
-			unregisterPlatformAccessories: sinon.stub(),
-			updatePlatformAccessories: sinon.stub()
+			platformAccessory: vi.fn().mockReturnValue(mockAccessory),
+			registerPlatformAccessories: vi.fn(),
+			unregisterPlatformAccessories: vi.fn(),
+			updatePlatformAccessories: vi.fn()
 		} as any;
 
-		// Stub the RabbitAirAccessory constructor
-		accessoryConstructorStub = sinon.stub(RabbitAirAccessory.prototype, 'constructor' as any);
-
 		// Stub RabbitAirClient methods
-		sinon.stub(RabbitAirClient.prototype, 'connect').resolves();
-		sinon.stub(RabbitAirClient.prototype, 'getInfo').resolves({ name: 'Test', mac: '00:11:22:33:44:55', model: 'A3' });
-		sinon.stub(RabbitAirClient.prototype, 'getState').resolves({ power: true, mode: 0, speed: 2, quality: 2 });
-		sinon.stub(RabbitAirClient.prototype, 'shutdown').resolves();
+		vi.spyOn(RabbitAirClient.prototype, 'connect').mockResolvedValue(undefined);
+		vi.spyOn(RabbitAirClient.prototype, 'getInfo').mockResolvedValue({ name: 'Test', mac: '00:11:22:33:44:55', model: 'A3' });
+		vi.spyOn(RabbitAirClient.prototype, 'getState').mockResolvedValue({ power: true, mode: 0, speed: 2, quality: 2 });
+		vi.spyOn(RabbitAirClient.prototype, 'shutdown').mockResolvedValue(undefined);
 	});
 
 	afterEach(() => {
-		sinon.restore();
+		vi.clearAllMocks();
 	});
 
 	describe('constructor', () => {
 		it('should initialize platform with valid configuration', () => {
 			platform = new RabbitAirPlatform(mockLogger, validConfig, mockApi);
-			expect(platform.log).to.equal(mockLogger);
-			expect(platform.config).to.equal(validConfig);
-			expect(platform.api).to.equal(mockApi);
-			expect(mockApi.on).to.have.been.calledWith('didFinishLaunching');
+			expect(platform.log).toBe(mockLogger);
+			expect(platform.config).toBe(validConfig);
+			expect(platform.api).toBe(mockApi);
+			expect(mockApi.on).toHaveBeenCalledWith('didFinishLaunching', expect.any(Function));
 		});
 
 		it('should set up service and characteristic references', () => {
 			platform = new RabbitAirPlatform(mockLogger, validConfig, mockApi);
 
-			expect(platform.Service).to.equal(mockApi.hap.Service);
-			expect(platform.Characteristic).to.equal(mockApi.hap.Characteristic);
+		expect(platform.Service).toBe(mockApi.hap.Service);
+		expect(platform.Characteristic).toBe(mockApi.hap.Characteristic);
 		});
 	});
 
@@ -103,8 +97,8 @@ describe('RabbitAirPlatform', () => {
 		it('should add accessory to cache', () => {
 			platform.configureAccessory(mockAccessory);
 
-			expect(platform.accessories.get(mockAccessory.UUID)).to.equal(mockAccessory);
-			expect(mockLogger.info).to.have.been.calledWith('Loading accessory from cache:', mockAccessory.displayName);
+		expect(platform.accessories.get(mockAccessory.UUID)).toBe(mockAccessory);
+		expect(mockLogger.info).toHaveBeenCalledWith('Loading accessory from cache:', mockAccessory.displayName);
 		});
 	});
 
@@ -119,14 +113,14 @@ describe('RabbitAirPlatform', () => {
 
 			platform.discoverDevices();
 
-			expect(mockLogger.warn).to.have.been.calledWith('No devices configured. Please add RabbitAir devices to your config.');
+			expect(mockLogger.warn).toHaveBeenCalledWith('No devices configured. Please add RabbitAir devices to your config.');
 		});
 
 		it('should register new accessories for valid device configurations', () => {
 			platform.discoverDevices();
 
-			expect(mockApi.hap.uuid.generate).to.have.been.called;
-			expect(mockApi.registerPlatformAccessories).to.have.been.calledWith(
+			expect(mockApi.hap.uuid.generate).toHaveBeenCalled();
+			expect(mockApi.registerPlatformAccessories).toHaveBeenCalledWith(
 				PLUGIN_NAME,
 				PLATFORM_NAME,
 				[mockAccessory]
@@ -140,8 +134,8 @@ describe('RabbitAirPlatform', () => {
 
 			await platform.discoverDevices();
 
-			expect(mockApi.updatePlatformAccessories).to.have.been.calledWith([mockAccessory]);
-			expect(mockLogger.info).to.have.been.calledWith('Restoring existing accessory from cache:', mockAccessory.displayName);
+			expect(mockApi.updatePlatformAccessories).toHaveBeenCalledWith([mockAccessory]);
+			expect(mockLogger.info).toHaveBeenCalledWith('Restoring existing accessory from cache:', mockAccessory.displayName);
 		});
 
 		it('should skip invalid device configurations', () => {
@@ -156,12 +150,12 @@ describe('RabbitAirPlatform', () => {
 
 			platform.discoverDevices();
 
-			expect(mockLogger.error).to.have.been.calledWith(
+			expect(mockLogger.error).toHaveBeenCalledWith(
 				'Invalid device configuration. Name, host, and token are required:',
 				{ name: '', host: '', token: '' }
 			);
 			// Should still process the valid device
-			expect(mockApi.registerPlatformAccessories).to.have.been.calledOnce;
+			expect(mockApi.registerPlatformAccessories).toHaveBeenCalledOnce();
 		});
 
 		it('should remove accessories no longer in config', () => {
@@ -173,12 +167,12 @@ describe('RabbitAirPlatform', () => {
 
 			platform.discoverDevices();
 
-			expect(mockApi.unregisterPlatformAccessories).to.have.been.calledWith(
+			expect(mockApi.unregisterPlatformAccessories).toHaveBeenCalledWith(
 				PLUGIN_NAME,
 				PLATFORM_NAME,
 				[removedAccessory]
 			);
-			expect(mockLogger.info).to.have.been.calledWith('Removing existing accessory from cache:', removedAccessory.displayName);
+			expect(mockLogger.info).toHaveBeenCalledWith('Removing existing accessory from cache:', removedAccessory.displayName);
 		});
 	});
 
@@ -189,7 +183,7 @@ describe('RabbitAirPlatform', () => {
 
 			platform.discoverDevices();
 
-			expect(mockLogger.warn).to.have.been.calledWith('No devices configured. Please add RabbitAir devices to your config.');
+			expect(mockLogger.warn).toHaveBeenCalledWith('No devices configured. Please add RabbitAir devices to your config.');
 		});
 
 		it('should use default port when not specified', () => {
@@ -204,7 +198,7 @@ describe('RabbitAirPlatform', () => {
 			};
 			platform = new RabbitAirPlatform(mockLogger, configWithoutPort, mockApi);
 
-			expect(() => platform.discoverDevices()).to.not.throw();
+			expect(() => platform.discoverDevices()).not.toThrow();
 		});
 	});
 
@@ -214,41 +208,41 @@ describe('RabbitAirPlatform', () => {
 		});
 
 		it('should initialize platform on Homebridge startup (T008)', () => {
-			expect(platform).to.exist;
-			expect(platform.log).to.equal(mockLogger);
-			expect(platform.config).to.deep.equal(validConfig);
-			expect(platform.api).to.equal(mockApi);
-			expect(mockApi.on).to.have.been.calledWith('didFinishLaunching');
+			expect(platform).toBeDefined();
+			expect(platform.log).toBe(mockLogger);
+			expect(platform.config).toEqual(validConfig);
+			expect(platform.api).toBe(mockApi);
+			expect(mockApi.on).toHaveBeenCalledWith('didFinishLaunching', expect.any(Function));
 		});
 
 		it('should discover devices on didFinishLaunching event (T009)', () => {
-			const discoverSpy = sinon.spy(platform, 'discoverDevices');
+			const discoverSpy = vi.spyOn(platform, 'discoverDevices');
 
 			// Trigger the 'didFinishLaunching' event
-			const callback = mockApi.on.getCall(0).args[1];
+			const callback = mockApi.on.mock.calls[0][1];
 			callback();
 
-			expect(discoverSpy).to.have.been.calledOnce;
+			expect(discoverSpy).toHaveBeenCalled();
 		});
 
 		it('should restore cached accessories on startup (T010)', () => {
 			platform.configureAccessory(mockAccessory);
-			expect(platform.accessories.has(mockAccessory.UUID)).to.equal(true);
-			expect(platform.accessories.get(mockAccessory.UUID)).to.equal(mockAccessory);
+			expect(platform.accessories.has(mockAccessory.UUID)).toBe(true);
+			expect(platform.accessories.get(mockAccessory.UUID)).toBe(mockAccessory);
 		});
 
 		it('should register new accessories when devices are configured (T011)', () => {
-			const uuidStub = mockApi.hap.uuid.generate as sinon.SinonStub;
-			uuidStub.returns('new-uuid');
+			const uuidStub = mockApi.hap.uuid.generate;
+			uuidStub.mockReturnValue('new-uuid');
 
 			platform.discoverDevices();
 
-			expect(mockApi.registerPlatformAccessories).to.have.been.calledWith(
+			expect(mockApi.registerPlatformAccessories).toHaveBeenCalledWith(
 				PLUGIN_NAME,
 				PLATFORM_NAME,
-				sinon.match.array
+				expect.any(Array)
 			);
-			expect(mockLogger.info).to.have.been.called;
+			expect(mockLogger.info).toHaveBeenCalled();
 		});
 
 		it('should unregister accessories when devices are removed from config (T012)', () => {
@@ -262,12 +256,12 @@ describe('RabbitAirPlatform', () => {
 
 			platform.discoverDevices();
 
-			expect(mockApi.unregisterPlatformAccessories).to.have.been.calledWith(
+			expect(mockApi.unregisterPlatformAccessories).toHaveBeenCalledWith(
 				PLUGIN_NAME,
 				PLATFORM_NAME,
 				[orphanedAccessory]
 			);
-			expect(mockLogger.info).to.have.been.calledWith(
+			expect(mockLogger.info).toHaveBeenCalledWith(
 				'Removing existing accessory from cache:',
 				'Orphaned Device'
 			);
@@ -296,7 +290,7 @@ describe('RabbitAirPlatform', () => {
 			platform = new RabbitAirPlatform(mockLogger, invalidConfig, mockApi);
 			platform.discoverDevices();
 
-			expect(mockLogger.error).to.have.been.called;
+			expect(mockLogger.error).toHaveBeenCalled();
 		});
 
 		it('should handle missing devices array', () => {
@@ -309,31 +303,33 @@ describe('RabbitAirPlatform', () => {
 			platform = new RabbitAirPlatform(mockLogger, configWithoutDevices, mockApi);
 			platform.discoverDevices();
 
-			expect(mockLogger.warn).to.have.been.calledWith(
+			expect(mockLogger.warn).toHaveBeenCalledWith(
 				'No devices configured. Please add RabbitAir devices to your config.'
 			);
 		});
 
 		it('should recover from device registration errors', () => {
-			mockApi.registerPlatformAccessories.throws(new Error('Registration failed'));
+			mockApi.registerPlatformAccessories.mockImplementation(() => {
+				throw new Error('Registration failed');
+			});
 
 			platform = new RabbitAirPlatform(mockLogger, validConfig, mockApi);
 
-			expect(() => platform.discoverDevices()).to.not.throw();
+			expect(() => platform.discoverDevices()).not.toThrow();
 		});
 	});
 
 	describe('Platform Lifecycle - Phase 5 (T037-T041)', () => {
 		it('T037: should initialize platform with valid configuration', () => {
 			platform = new RabbitAirPlatform(mockLogger, validConfig, mockApi);
-			
-			expect(platform).to.exist;
-			expect(platform.log).to.equal(mockLogger);
-			expect(platform.config).to.deep.equal(validConfig);
-			expect(platform.api).to.equal(mockApi);
-			expect(platform.Service).to.equal(mockApi.hap.Service);
-			expect(platform.Characteristic).to.equal(mockApi.hap.Characteristic);
-			expect(mockApi.on).to.have.been.calledWith('didFinishLaunching');
+
+			expect(platform).toBeDefined();
+			expect(platform.log).toBe(mockLogger);
+			expect(platform.config).toEqual(validConfig);
+			expect(platform.api).toBe(mockApi);
+			expect(platform.Service).toBe(mockApi.hap.Service);
+			expect(platform.Characteristic).toBe(mockApi.hap.Characteristic);
+			expect(mockApi.on).toHaveBeenCalledWith('didFinishLaunching', expect.any(Function));
 		});
 
 		it('T038: should discover multiple devices from config', () => {
@@ -366,13 +362,13 @@ describe('RabbitAirPlatform', () => {
 			platform.discoverDevices();
 
 			// Should generate UUID for each device
-			expect(mockApi.hap.uuid.generate).to.have.been.calledThrice;
-			
+			expect(mockApi.hap.uuid.generate).toHaveBeenCalledTimes(3);
+
 			// Should register all three devices
-			expect(mockApi.registerPlatformAccessories).to.have.been.called;
-			
+			expect(mockApi.registerPlatformAccessories).toHaveBeenCalled();
+
 			// Verify all devices are tracked
-			expect(platform.discoveredCacheUUIDs.length).to.equal(3);
+			expect(platform.discoveredCacheUUIDs.length).toBe(3);
 		});
 
 		it('T039: should restore cached accessories on startup', () => {
@@ -387,27 +383,27 @@ describe('RabbitAirPlatform', () => {
 			};
 
 			platform = new RabbitAirPlatform(mockLogger, validConfig, mockApi);
-			
+
 			// Simulate Homebridge restoring cached accessory
 			platform.configureAccessory(cachedAccessory);
-			
+
 			// Verify accessory was added to cache
 			expect(platform.accessories.has(cachedUuid)).to.be.true;
-			expect(platform.accessories.get(cachedUuid)).to.equal(cachedAccessory);
-			expect(mockLogger.info).to.have.been.calledWith(
+			expect(platform.accessories.get(cachedUuid)).toBe(cachedAccessory);
+			expect(mockLogger.info).toHaveBeenCalledWith(
 				'Loading accessory from cache:',
 				'Cached Living Room Purifier'
 			);
 
 			// Mock UUID generation to return the cached UUID
-			(mockApi.hap.uuid.generate as sinon.SinonStub).returns(cachedUuid);
+			(mockApi.hap.uuid.generate).mockReturnValue(cachedUuid);
 
 			// Trigger device discovery
 			platform.discoverDevices();
 
 			// Should restore existing accessory instead of creating new one
-			expect(mockApi.updatePlatformAccessories).to.have.been.calledWith([cachedAccessory]);
-			expect(mockLogger.info).to.have.been.calledWith(
+			expect(mockApi.updatePlatformAccessories).toHaveBeenCalledWith([cachedAccessory]);
+			expect(mockLogger.info).toHaveBeenCalledWith(
 				'Restoring existing accessory from cache:',
 				cachedAccessory.displayName
 			);
@@ -428,14 +424,14 @@ describe('RabbitAirPlatform', () => {
 			};
 
 			platform = new RabbitAirPlatform(mockLogger, configWithInvalidToken, mockApi);
-			
+
 			// The platform itself doesn't validate token length (that's done in RabbitAirClient)
 			// but it should handle the device config
-			expect(() => platform.discoverDevices()).to.not.throw();
-			
+			expect(() => platform.discoverDevices()).not.toThrow();
+
 			// The accessory would be created and then the client would validate
 			// For this test, we verify the platform processes the config
-			expect(platform).to.exist;
+			expect(platform).toBeDefined();
 		});
 
 		it('T041: should validate required host field', () => {
@@ -456,13 +452,13 @@ describe('RabbitAirPlatform', () => {
 			platform.discoverDevices();
 
 			// Should log error about invalid configuration
-			expect(mockLogger.error).to.have.been.calledWith(
+			expect(mockLogger.error).toHaveBeenCalledWith(
 				'Invalid device configuration. Name, host, and token are required:',
 				configWithMissingHost.devices[0]
 			);
 
 			// Should not register accessory with invalid config
-			expect(mockApi.registerPlatformAccessories).to.not.have.been.called;
+			expect(mockApi.registerPlatformAccessories).not.toHaveBeenCalled();
 		});
 
 		it('T041: should validate required name field', () => {
@@ -483,13 +479,13 @@ describe('RabbitAirPlatform', () => {
 			platform.discoverDevices();
 
 			// Should log error about invalid configuration
-			expect(mockLogger.error).to.have.been.calledWith(
+			expect(mockLogger.error).toHaveBeenCalledWith(
 				'Invalid device configuration. Name, host, and token are required:',
 				configWithMissingName.devices[0]
 			);
 
 			// Should not register accessory with invalid config
-			expect(mockApi.registerPlatformAccessories).to.not.have.been.called;
+			expect(mockApi.registerPlatformAccessories).not.toHaveBeenCalled();
 		});
 
 		it('T041: should validate required token field', () => {
@@ -510,13 +506,13 @@ describe('RabbitAirPlatform', () => {
 			platform.discoverDevices();
 
 			// Should log error about invalid configuration
-			expect(mockLogger.error).to.have.been.calledWith(
+			expect(mockLogger.error).toHaveBeenCalledWith(
 				'Invalid device configuration. Name, host, and token are required:',
 				configWithMissingToken.devices[0]
 			);
 
 			// Should not register accessory with invalid config
-			expect(mockApi.registerPlatformAccessories).to.not.have.been.called;
+			expect(mockApi.registerPlatformAccessories).not.toHaveBeenCalled();
 		});
 	});
 
@@ -544,8 +540,8 @@ describe('RabbitAirPlatform', () => {
 			platform = new RabbitAirPlatform(mockLogger, multiDeviceConfig, mockApi);
 			platform.discoverDevices();
 
-			expect(mockApi.hap.uuid.generate).to.have.been.calledTwice;
-			expect(mockApi.registerPlatformAccessories).to.have.been.called;
+			expect(mockApi.hap.uuid.generate).toHaveBeenCalledTimes(2);
+			expect(mockApi.registerPlatformAccessories).toHaveBeenCalled();
 		});
 
 		it('should not cross-contaminate device states', () => {
@@ -572,14 +568,12 @@ describe('RabbitAirPlatform', () => {
 
 			const uuid1 = 'uuid-1';
 			const uuid2 = 'uuid-2';
-			const uuidStub = mockApi.hap.uuid.generate as sinon.SinonStub;
-			uuidStub.onCall(0).returns(uuid1);
-			uuidStub.onCall(1).returns(uuid2);
+			mockApi.hap.uuid.generate.mockReturnValueOnce(uuid1).mockReturnValueOnce(uuid2);
 
 			platform.discoverDevices();
 
 			// Verify both devices registered with unique UUIDs
-			expect(mockApi.hap.uuid.generate).to.have.been.calledTwice;
+			expect(mockApi.hap.uuid.generate).toHaveBeenCalledTimes(2);
 		});
 	});
 });

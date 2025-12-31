@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { expect, describe, it, beforeEach, afterEach, vi } from 'vitest';
 import sinon from 'sinon';
 import { API } from 'homebridge';
 import homebridge from '../../src/index.js';
@@ -29,7 +29,7 @@ describe('Homebridge Plugin Integration', () => {
 	describe('plugin registration', () => {
 		it('should register the RabbitAir platform with homebridge', () => {
 			homebridge(mockApi);
-			
+
 			expect(mockApi.registerPlatform).to.have.been.calledOnce;
 			expect(mockApi.registerPlatform).to.have.been.calledWith(PLATFORM_NAME, RabbitAirPlatform);
 		});
