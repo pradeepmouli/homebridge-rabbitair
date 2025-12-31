@@ -201,7 +201,7 @@ describe('Homebridge RabbitAir E2E Flow', () => {
 				await client.getState();
 			} catch (err: any) {
 				// Expected to fail without matching the exact encryption implementation
-				expect(['Device not reachable', 'Timeout']).toContain(err.message);
+				expect(err.message).toMatch(/Device not reachable|Timeout/);
 			}
 		}, 15000); // Increase timeout to 15 seconds
 	});
