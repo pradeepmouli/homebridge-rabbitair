@@ -1,4 +1,3 @@
-import { expect } from 'vitest';
 import * as chai from 'chai';
 import sinonChai from 'sinon-chai';
 import chaiAsPromised from 'chai-as-promised';
@@ -7,7 +6,7 @@ import chaiAsPromised from 'chai-as-promised';
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
 
-// Make chai available globally for compatibility
+// Make chai available globally for compatibility with both Mocha and Vitest
 global.chai = chai;
 global.expect = chai.expect;
 
