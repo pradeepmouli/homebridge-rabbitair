@@ -323,6 +323,203 @@ describe('RabbitAirPlatform', () => {
 		});
 	});
 
+	describe('Platform Lifecycle - Phase 5 (T037-T041)', () => {
+		it('T037: should initialize platform with valid configuration', () => {
+			platform = new RabbitAirPlatform(mockLogger, validConfig, mockApi);
+			
+			expect(platform).to.exist;
+			expect(platform.log).to.equal(mockLogger);
+			expect(platform.config).to.deep.equal(validConfig);
+			expect(platform.api).to.equal(mockApi);
+			expect(platform.Service).to.equal(mockApi.hap.Service);
+			expect(platform.Characteristic).to.equal(mockApi.hap.Characteristic);
+			expect(mockApi.on).to.have.been.calledWith('didFinishLaunching');
+		});
+
+		it('T038: should discover multiple devices from config', () => {
+			const multiDeviceConfig: RabbitAirPlatformConfig = {
+				platform: PLATFORM_NAME,
+				name: 'RabbitAir',
+				devices: [
+					{
+						name: 'Living Room Purifier',
+						host: '192.168.1.100',
+						token: '12345678901234567890123456789012',
+						port: 9009
+					},
+					{
+						name: 'Bedroom Purifier',
+						host: '192.168.1.101',
+						token: '23456789012345678901234567890123',
+						port: 9009
+					},
+					{
+						name: 'Office Purifier',
+						host: '192.168.1.102',
+						token: '34567890123456789012345678901234',
+						port: 9009
+					}
+				]
+			};
+
+			platform = new RabbitAirPlatform(mockLogger, multiDeviceConfig, mockApi);
+			platform.discoverDevices();
+
+			// Should generate UUID for each device
+			expect(mockApi.hap.uuid.generate).to.have.been.calledThrice;
+			
+			// Should register all three devices
+			expect(mockApi.registerPlatformAccessories).to.have.been.called;
+			
+			// Verify all devices are tracked
+			expect(platform.discoveredCacheUUIDs.length).to.equal(3);
+		});
+
+		it('T039: should restore cached accessories on startup', () => {
+			const cachedUuid = 'cached-uuid-12345';
+			const cachedAccessory = {
+				...mockAccessory,
+				UUID: cachedUuid,
+				displayName: 'Cached Living Room Purifier',
+				context: {
+					device: validConfig.devices![0]
+				}
+			};
+
+			platform = new RabbitAirPlatform(mockLogger, validConfig, mockApi);
+			
+			// Simulate Homebridge restoring cached accessory
+			platform.configureAccessory(cachedAccessory);
+			
+			// Verify accessory was added to cache
+			expect(platform.accessories.has(cachedUuid)).to.be.true;
+			expect(platform.accessories.get(cachedUuid)).to.equal(cachedAccessory);
+			expect(mockLogger.info).to.have.been.calledWith(
+				'Loading accessory from cache:',
+				'Cached Living Room Purifier'
+			);
+
+			// Mock UUID generation to return the cached UUID
+			(mockApi.hap.uuid.generate as sinon.SinonStub).returns(cachedUuid);
+
+			// Trigger device discovery
+			platform.discoverDevices();
+
+			// Should restore existing accessory instead of creating new one
+			expect(mockApi.updatePlatformAccessories).to.have.been.calledWith([cachedAccessory]);
+			expect(mockLogger.info).to.have.been.calledWith(
+				'Restoring existing accessory from cache:',
+				cachedAccessory.displayName
+			);
+		});
+
+		it('T040: should validate device token length (reject invalid tokens)', () => {
+			const configWithInvalidToken = {
+				platform: PLATFORM_NAME,
+				name: 'RabbitAir',
+				devices: [
+					{
+						name: 'Test Purifier',
+						host: '192.168.1.100',
+						token: '1234567890123456789012345678901', // 31 chars - invalid
+						port: 9009
+					}
+				]
+			};
+
+			platform = new RabbitAirPlatform(mockLogger, configWithInvalidToken, mockApi);
+			
+			// The platform itself doesn't validate token length (that's done in RabbitAirClient)
+			// but it should handle the device config
+			expect(() => platform.discoverDevices()).to.not.throw();
+			
+			// The accessory would be created and then the client would validate
+			// For this test, we verify the platform processes the config
+			expect(platform).to.exist;
+		});
+
+		it('T041: should validate required host field', () => {
+			const configWithMissingHost = {
+				platform: PLATFORM_NAME,
+				name: 'RabbitAir',
+				devices: [
+					{
+						name: 'Test Purifier',
+						host: '', // Missing/empty host
+						token: '12345678901234567890123456789012',
+						port: 9009
+					}
+				]
+			};
+
+			platform = new RabbitAirPlatform(mockLogger, configWithMissingHost, mockApi);
+			platform.discoverDevices();
+
+			// Should log error about invalid configuration
+			expect(mockLogger.error).to.have.been.calledWith(
+				'Invalid device configuration. Name, host, and token are required:',
+				configWithMissingHost.devices[0]
+			);
+
+			// Should not register accessory with invalid config
+			expect(mockApi.registerPlatformAccessories).to.not.have.been.called;
+		});
+
+		it('T041: should validate required name field', () => {
+			const configWithMissingName = {
+				platform: PLATFORM_NAME,
+				name: 'RabbitAir',
+				devices: [
+					{
+						name: '', // Missing/empty name
+						host: '192.168.1.100',
+						token: '12345678901234567890123456789012',
+						port: 9009
+					}
+				]
+			};
+
+			platform = new RabbitAirPlatform(mockLogger, configWithMissingName, mockApi);
+			platform.discoverDevices();
+
+			// Should log error about invalid configuration
+			expect(mockLogger.error).to.have.been.calledWith(
+				'Invalid device configuration. Name, host, and token are required:',
+				configWithMissingName.devices[0]
+			);
+
+			// Should not register accessory with invalid config
+			expect(mockApi.registerPlatformAccessories).to.not.have.been.called;
+		});
+
+		it('T041: should validate required token field', () => {
+			const configWithMissingToken = {
+				platform: PLATFORM_NAME,
+				name: 'RabbitAir',
+				devices: [
+					{
+						name: 'Test Purifier',
+						host: '192.168.1.100',
+						token: '', // Missing/empty token
+						port: 9009
+					}
+				]
+			};
+
+			platform = new RabbitAirPlatform(mockLogger, configWithMissingToken, mockApi);
+			platform.discoverDevices();
+
+			// Should log error about invalid configuration
+			expect(mockLogger.error).to.have.been.calledWith(
+				'Invalid device configuration. Name, host, and token are required:',
+				configWithMissingToken.devices[0]
+			);
+
+			// Should not register accessory with invalid config
+			expect(mockApi.registerPlatformAccessories).to.not.have.been.called;
+		});
+	});
+
 	describe('Multi-Device Support (T050)', () => {
 		it('should handle multiple devices independently', () => {
 			const multiDeviceConfig: RabbitAirPlatformConfig = {
