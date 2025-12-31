@@ -23,11 +23,11 @@ test/
 
 ## Test Framework
 
-- **Test Runner**: Mocha
-- **Assertion Library**: Chai
-- **Mocking Library**: Sinon
-- **Coverage Tool**: c8
-- **TypeScript Support**: tsx
+- **Test Runner**: Vitest
+- **Assertion Library**: Vitest (built-in `expect` API)
+- **Mocking Library**: Vitest (built-in `vi` mock functions)
+- **Coverage Tool**: Vitest (built-in v8 coverage)
+- **TypeScript Support**: Native (Vitest handles TS directly)
 
 ## Running Tests
 
@@ -112,32 +112,33 @@ The E2E tests use a mock UDP server (`MockRabbitAirServer`) that simulates a Rab
 
 ## Test Configuration
 
-### Mocha Configuration (`.mocharc.json`)
-```json
-{
-	"recursive": true,
-	"timeout": 5000,
-	"exit": true
-}
-```
+### Vitest Configuration (`vitest.config.ts`)
+```typescript
+import { defineConfig } from 'vitest/config';
 
-### Coverage Configuration (`.c8rc.json`)
-```json
-{
-	"all": true,
-	"include": ["src/**/*.ts"],
-	"exclude": ["**/*.d.ts"],
-	"reporter": ["text", "lcov", "html"],
-	"reportsDir": "coverage"
-}
+export default defineConfig({
+	test: {
+		globals: true,
+		environment: 'node',
+		include: ['test/**/*.test.ts'],
+		coverage: {
+			provider: 'v8',
+			reporter: ['text', 'lcov', 'html'],
+			include: ['src/**/*.ts'],
+			exclude: ['**/*.d.ts'],
+			reportsDirectory: './coverage'
+		},
+		testTimeout: 10000,
+		hookTimeout: 10000
+	}
+});
 ```
 
 ## Writing Tests
 
 ### Basic Test Structure
 ```typescript
-import { expect } from 'chai';
-import sinon from 'sinon';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 describe('Component Name', () => {
 	beforeEach(() => {
@@ -145,13 +146,13 @@ describe('Component Name', () => {
 	});
 
 	afterEach(() => {
-		sinon.restore(); // Clean up stubs/spies
+		vi.restoreAllMocks(); // Clean up mocks
 	});
 
 	describe('method name', () => {
 		it('should do something', () => {
 			// Test implementation
-			expect(result).to.equal(expected);
+			expect(result).toBe(expected);
 		});
 	});
 });
@@ -159,36 +160,71 @@ describe('Component Name', () => {
 
 ### Mocking Dependencies
 ```typescript
-import sinon from 'sinon';
+import { vi } from 'vitest';
 
 // Mock object methods
 const mockLogger = {
-	debug: sinon.stub(),
-	info: sinon.stub(),
-	warn: sinon.stub(),
-	error: sinon.stub()
+	debug: vi.fn(),
+	info: vi.fn(),
+	warn: vi.fn(),
+	error: vi.fn()
 };
 
-// Stub class constructor
-sinon.stub(MyClass.prototype, 'constructor' as any);
+// Spy on class methods
+vi.spyOn(MyClass.prototype, 'methodName').mockResolvedValue(result);
+
+// Mock implementations
+const mockFn = vi.fn().mockImplementation(() => {
+	return 'mocked value';
+});
 ```
 
 ### Testing Async Code
 ```typescript
 it('should handle async operations', async () => {
 	const result = await myAsyncFunction();
-	expect(result).to.exist;
+	expect(result).toBeDefined();
 });
+
+// Testing promises
+it('should handle rejections', async () => {
+	await expect(myFailingFunction()).rejects.toThrow('Error message');
+});
+```
+
+### Common Assertions
+```typescript
+// Value comparisons
+expect(value).toBe(5);                    // Strict equality (===)
+expect(object).toEqual({ key: 'value' }); // Deep equality
+expect(value).toBeTruthy();               // Truthy value
+expect(value).toBeNull();                 // Null check
+expect(value).toBeDefined();              // Not undefined
+
+// Type checks
+expect(value).toBeTypeOf('string');
+expect(value).toBeInstanceOf(MyClass);
+
+// Mock assertions
+expect(mockFn).toHaveBeenCalled();
+expect(mockFn).toHaveBeenCalledTimes(2);
+expect(mockFn).toHaveBeenCalledWith('arg1', 'arg2');
+expect(mockFn).toHaveBeenLastCalledWith('arg');
+
+// Async assertions
+await expect(promise).resolves.toBe(value);
+await expect(promise).rejects.toThrow();
 ```
 
 ## Best Practices
 
 1. **Isolation**: Each test should be independent and not rely on other tests
-2. **Mocking**: Mock external dependencies to test in isolation
+2. **Mocking**: Mock external dependencies to test in isolation using `vi.fn()` and `vi.spyOn()`
 3. **Coverage**: Aim for high test coverage, especially for critical paths
-4. **Cleanup**: Always clean up resources and restore stubs after tests
+4. **Cleanup**: Always clean up resources and restore mocks with `vi.restoreAllMocks()` in `afterEach()`
 5. **Descriptive Names**: Use clear, descriptive test names that explain what's being tested
 6. **Edge Cases**: Test both happy paths and error conditions
+7. **Timeouts**: Use test timeout parameter for long-running tests: `it('test', async () => {...}, 15000)`
 
 ## Continuous Integration
 
