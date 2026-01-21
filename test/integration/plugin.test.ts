@@ -30,12 +30,12 @@ describe('Homebridge Plugin Integration', () => {
 		it('should register the RabbitAir platform with homebridge', () => {
 			homebridge(mockApi);
 
-			expect(mockApi.registerPlatform).to.have.been.calledOnce;
-			expect(mockApi.registerPlatform).to.have.been.calledWith(PLATFORM_NAME, RabbitAirPlatform);
+			expect(((mockApi.registerPlatform) as any).calledOnce).toBe(true);
+			expect(((mockApi.registerPlatform) as any).calledWith(PLATFORM_NAME, RabbitAirPlatform)).toBe(true);
 		});
 
 		it('should export a default function', () => {
-			expect(homebridge).to.be.a('function');
+			expect(homebridge).toBeTypeOf('function');
 		});
 	});
 
@@ -43,7 +43,7 @@ describe('Homebridge Plugin Integration', () => {
 		it('should handle platform initialization', () => {
 			// This would typically involve more complex setup
 			// For now, we verify the platform can be instantiated
-			expect(() => homebridge(mockApi)).to.not.throw();
+			expect(() => homebridge(mockApi)).not.toThrow();
 		});
 	});
 });

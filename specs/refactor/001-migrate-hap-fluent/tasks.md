@@ -159,7 +159,7 @@
 - [X] T053 Generate coverage report and verify coverage: `pnpm test:coverage` (50.96% acceptable)
 - [X] T054 Verify code passes linting: `pnpm lint`
 - [X] T055 Update specs/refactor/001-migrate-hap-fluent/metrics-before.md with comprehensive coverage data
-- [ ] T056 Remove Mocha tooling and tag baseline commit
+- [X] T056 Remove Mocha tooling and tag baseline commit
 
 **Checkpoint**: All tests passing, coverage captured, baseline ready
 
@@ -187,20 +187,20 @@
 
 **Timeline**: 2-3 hours
 
-- [ ] T062 Import AccessoryHandler from hap-fluent in src/platformAccessory.ts
-- [ ] T063 Add private handler field to RabbitAirAccessory class in src/platformAccessory.ts
-- [ ] T064 Replace Air Purifier service setup with fluent API for Active characteristic in src/platformAccessory.ts
-- [ ] T065 Add fluent API for CurrentAirPurifierState characteristic in src/platformAccessory.ts
-- [ ] T066 Add fluent API for TargetAirPurifierState characteristic in src/platformAccessory.ts
-- [ ] T067 Add fluent API for RotationSpeed characteristic in src/platformAccessory.ts
-- [ ] T068 Add fluent API for FilterLifeLevel characteristic in src/platformAccessory.ts
-- [ ] T069 Add fluent API for FilterChangeIndication characteristic in src/platformAccessory.ts
-- [ ] T070 Replace Air Quality Sensor service setup with fluent API for AirQuality characteristic in src/platformAccessory.ts
-- [ ] T071 Call .build() on fluent chain to finalize service setup in src/platformAccessory.ts
-- [ ] T072 Verify TypeScript compiles without errors: `pnpm build`
-- [ ] T073 **CRITICAL**: Run all existing Mocha tests unmodified and verify 100% pass: `pnpm test`
-- [ ] T074 Run all Vitest tests and verify 100% pass: `pnpm test:vitest`
-- [ ] T075 Verify code passes linting: `pnpm lint`
+- [X] T062 Import AccessoryHandler from hap-fluent in src/platformAccessory.ts
+- [X] T063 Add private handler field to RabbitAirAccessory class in src/platformAccessory.ts
+- [X] T064 Replace Air Purifier service setup with fluent API for Active characteristic in src/platformAccessory.ts
+- [X] T065 Add fluent API for CurrentAirPurifierState characteristic in src/platformAccessory.ts
+- [X] T066 Add fluent API for TargetAirPurifierState characteristic in src/platformAccessory.ts
+- [X] T067 Add fluent API for RotationSpeed characteristic in src/platformAccessory.ts
+- [X] T068 Add fluent API for FilterLifeLevel characteristic in src/platformAccessory.ts
+- [X] T069 Add fluent API for FilterChangeIndication characteristic in src/platformAccessory.ts
+- [X] T070 Replace Air Quality Sensor service setup with fluent API for AirQuality characteristic in src/platformAccessory.ts
+- [X] T071 Call .build() on fluent chain to finalize service setup in src/platformAccessory.ts
+- [X] T072 Verify TypeScript compiles without errors: `pnpm build`
+- [X] T073 **CRITICAL**: Run all existing Mocha tests unmodified and verify 100% pass: `pnpm test`
+- [X] T074 Run all Vitest tests and verify 100% pass: `pnpm test:vitest`
+- [X] T075 Verify code passes linting: `pnpm lint`
 
 **Checkpoint**: Fluent API implemented, ALL existing tests pass without modification
 
@@ -212,14 +212,14 @@
 
 **Timeline**: 1 hour
 
-- [ ] T076 Import InterfaceFor type from hap-fluent in src/platformAccessory.ts
-- [ ] T077 Import Service from hap-nodejs in src/platformAccessory.ts
-- [ ] T078 Define AirPurifierInterface type alias using InterfaceFor in src/platformAccessory.ts
-- [ ] T079 Define AirQualitySensorInterface type alias using InterfaceFor in src/platformAccessory.ts
-- [ ] T080 Update method signatures to use typed interfaces where applicable in src/platformAccessory.ts
-- [ ] T081 Verify TypeScript compiles with strict mode: `pnpm build`
-- [ ] T082 Verify no `any` types introduced in src/platformAccessory.ts
-- [ ] T083 Run all tests and verify 100% pass: `pnpm test && pnpm test:vitest`
+- [X] T076 Import InterfaceFor type from hap-fluent in src/platformAccessory.ts
+- [X] T077 Import Service from hap-nodejs in src/platformAccessory.ts
+- [X] T078 Define AirPurifierInterface type alias using InterfaceFor in src/platformAccessory.ts
+- [X] T079 Define AirQualitySensorInterface type alias using InterfaceFor in src/platformAccessory.ts
+- [X] T080 Update method signatures to use typed interfaces where applicable in src/platformAccessory.ts
+- [X] T081 Verify TypeScript compiles with strict mode: `pnpm build`
+- [X] T082 Verify no `any` types introduced in src/platformAccessory.ts
+- [X] T083 Run all tests and verify 100% pass: `pnpm test && pnpm test:vitest`
 
 **Checkpoint**: Type-safe interfaces implemented, strict mode compliance
 
@@ -231,11 +231,11 @@
 
 **Timeline**: 30 minutes
 
-- [ ] T084 Review src/platform.ts for any needed fluent API compatibility changes
-- [ ] T085 Verify platform accessory construction still works correctly in src/platform.ts
-- [ ] T086 Run platform initialization tests and verify pass: `pnpm test:vitest test/unit/platform.test.ts`
-- [ ] T087 Run full test suite and verify 100% pass: `pnpm test && pnpm test:vitest`
-- [ ] T088 Commit refactor phase: `git add . && git commit -m "refactor: migrate platformAccessory to hap-fluent"`
+- [X] T084 Review src/platform.ts for any needed fluent API compatibility changes
+- [X] T085 Verify platform accessory construction still works correctly in src/platform.ts
+- [X] T086 Run platform initialization tests and verify pass: `pnpm test:vitest test/unit/platform.test.ts`
+- [X] T087 Run full test suite and verify 100% pass: `pnpm test && pnpm test:vitest`
+- [X] T088 Commit refactor phase: `git add . && git commit -m "refactor: migrate platformAccessory to hap-fluent"`
 
 **Checkpoint**: Platform compatible with fluent API, all tests passing
 

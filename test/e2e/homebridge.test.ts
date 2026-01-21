@@ -145,23 +145,23 @@ describe('Homebridge RabbitAir E2E Flow', () => {
 			const plugin = await import('../../src/index.js');
 			plugin.default(mockApi);
 
-			expect(mockApi.registerPlatform).to.have.been.calledOnce;
-			expect(mockApi.registerPlatform).to.have.been.calledWith('RabbitAir');
+			expect(((mockApi.registerPlatform) as any).calledOnce).toBe(true);
+			expect(((mockApi.registerPlatform) as any).calledWith('RabbitAir')).toBe(true);
 		});
 
 		it('should create platform instance with configuration', () => {
 			platform = new RabbitAirPlatform(mockLogger, platformConfig, mockApi);
 
-			expect(platform).to.be.instanceOf(RabbitAirPlatform);
-			expect(platform.config).to.deep.equal(platformConfig);
-			expect(platform.accessories.size).to.equal(0);
+			expect(platform).toBeInstanceOf(RabbitAirPlatform);
+			expect(platform.config).toEqual(platformConfig);
+			expect(platform.accessories.size).toEqual(0);
 		});
 
 		it('should register didFinishLaunching callback', () => {
 			platform = new RabbitAirPlatform(mockLogger, platformConfig, mockApi);
 
 			// Verify callback was registered
-			expect(mockApi.on).to.have.been.calledWith('didFinishLaunching');
+			expect(((mockApi.on) as any).calledWith('didFinishLaunching')).toBe(true);
 		});
 	});
 
@@ -330,7 +330,7 @@ describe('Homebridge RabbitAir E2E Flow', () => {
 			await new Promise(resolve => setTimeout(resolve, 200));
 
 			// Should log error for invalid config
-			expect(mockLogger.error).to.have.been.called;
+			expect(((mockLogger.error) as any).called).toBe(true);
 		});
 
 		it('should handle missing device configuration', async () => {
@@ -349,7 +349,7 @@ describe('Homebridge RabbitAir E2E Flow', () => {
 			await new Promise(resolve => setTimeout(resolve, 200));
 
 			// Should log warning for no devices
-			expect(mockLogger.warn).to.have.been.called;
+			expect(((mockLogger.warn) as any).called).toBe(true);
 		});
 	});
 
@@ -365,8 +365,8 @@ describe('Homebridge RabbitAir E2E Flow', () => {
 			await new Promise(resolve => setTimeout(resolve, 500));
 
 			// Verify platform is initialized
-			expect(platform).to.exist;
-			expect(platform.accessories).to.exist;
+			expect(platform).toBeDefined();
+			expect(platform.accessories).toBeDefined();
 		});
 	});
 
@@ -398,7 +398,7 @@ describe('Homebridge RabbitAir E2E Flow', () => {
 			);
 
 			// Cleanup should not throw
-			await expect(client.shutdown()).to.not.be.rejected;
+			await expect(client.shutdown()).resolves.toBeUndefined();
 		});
 
 		it('should handle multiple cleanup calls gracefully', async () => {
@@ -413,7 +413,7 @@ describe('Homebridge RabbitAir E2E Flow', () => {
 
 			// Multiple cleanups should not throw
 			await client.shutdown();
-			await expect(client.shutdown()).to.not.be.rejected;
+			await expect(client.shutdown()).resolves.toBeUndefined();
 		});
 	});
 });
