@@ -27,6 +27,10 @@ describe('RabbitAirPlatform', () => {
 	};
 
 	beforeEach(() => {
+		const platformAccessoryConstructor = vi.fn(function PlatformAccessoryMock() {
+			return mockAccessory;
+		});
+
 		mockLogger = {
 			debug: vi.fn(),
 			info: vi.fn(),
@@ -55,7 +59,7 @@ describe('RabbitAirPlatform', () => {
 				Service: {},
 				Characteristic: {}
 			},
-			platformAccessory: vi.fn().mockReturnValue(mockAccessory),
+			platformAccessory: platformAccessoryConstructor,
 			registerPlatformAccessories: vi.fn(),
 			unregisterPlatformAccessories: vi.fn(),
 			updatePlatformAccessories: vi.fn()

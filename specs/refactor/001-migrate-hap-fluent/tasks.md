@@ -171,11 +171,11 @@
 
 **Timeline**: 30 minutes
 
-- [ ] T057 Install hap-fluent library: `pnpm add hap-fluent`
-- [ ] T058 Verify hap-fluent imports resolve in TypeScript: create temporary test import
-- [ ] T059 Update tsconfig.json to ensure test files included in compilation
-- [ ] T060 Verify TypeScript compilation passes: `pnpm build`
-- [ ] T061 Verify both test frameworks still pass: `pnpm test && pnpm test:vitest`
+ - [X] T057 Install hap-fluent library: `pnpm add hap-fluent`
+ - [X] T058 Verify hap-fluent imports resolve in TypeScript: create temporary test import
+ - [X] T059 Update tsconfig.json to ensure test files included in compilation
+ - [X] T060 Verify TypeScript compilation passes: `pnpm build`
+ - [X] T061 Verify both test frameworks still pass: `pnpm test && pnpm test:vitest`
 
 **Checkpoint**: hap-fluent installed and operational
 
