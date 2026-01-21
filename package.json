@@ -39,7 +39,6 @@
     "watch": "npm run build && npm link && nodemon"
   },
   "dependencies": {
-    "@types/chai-as-promised": "^8.0.2",
     "crypto-js": "^4.2.0",
     "hap-fluent": "^0.3.0",
     "hap-nodejs": "^1.2.0"
