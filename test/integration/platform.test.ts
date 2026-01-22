@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { expect, describe, it, beforeEach, afterEach, vi } from 'vitest';
 import { API, Characteristic, Logger, PlatformAccessory, Service, type Logging } from 'homebridge';
 import sinon from 'sinon';
 import { RabbitAirPlatform } from '../../src/platform.js';
@@ -146,22 +146,22 @@ describe('Homebridge Platform Integration', () => {
 		it('should initialize platform and discover devices', async () => {
 			platform = new RabbitAirPlatform(mockLogger, testConfig, mockApi);
 
-			expect(platform).to.be.instanceOf(RabbitAirPlatform);
-			expect(mockApi.on).to.have.been.calledWith('didFinishLaunching');
+			expect(platform).toBeInstanceOf(RabbitAirPlatform);
+			expect(((mockApi.on) as any).calledWith('didFinishLaunching')).toBe(true);
 
 			// Simulate the didFinishLaunching event
 			const callback = mockApi.on.getCall(0).args[1];
 			callback();
 
-			expect(mockLogger.debug).to.have.been.called;
+			expect(mockLogger.debug.called).toBe(true);
 		});
 
 		it('should create accessories for configured devices', () => {
 			platform = new RabbitAirPlatform(mockLogger, testConfig, mockApi);
 			platform.discoverDevices();
 
-			expect(mockApi.registerPlatformAccessories).to.have.been.calledOnce;
-			expect(mockApi.hap.uuid.generate).to.have.been.called;
+			expect(mockApi.registerPlatformAccessories.calledOnce).toBe(true);
+			expect(((mockApi.hap.uuid.generate) as any).called).toBe(true);
 		});
 
 		it('should handle cached accessory restoration', () => {
@@ -192,16 +192,21 @@ describe('Homebridge Platform Integration', () => {
 			accessory = new RabbitAirAccessory(platform, mockAccessory);
 
 			// Should setup accessory information - hap-fluent calls getService with service constructors
-			expect(mockAccessory.getService).to.have.been.calledWith(sinon.match.has('name', 'AccessoryInformation'));
+			const getServiceArgs = (mockAccessory.getService as any).args as any[];
+			const hasAccessoryInformation = getServiceArgs.some((call: any[]) => call && call[0] && call[0].name === 'AccessoryInformation');
+			expect(hasAccessoryInformation).toBe(true);
 
 			// Should setup air purifier service
-			expect(mockAccessory.getService).to.have.been.calledWith(sinon.match.has('name', 'AirPurifier'));
+			const hasAirPurifier = getServiceArgs.some((call: any[]) => call && call[0] && call[0].name === 'AirPurifier');
+			expect(hasAirPurifier).toBe(true);
 
 			// Should setup air quality sensor service
-			expect(mockAccessory.getService).to.have.been.calledWith(sinon.match.has('name', 'AirQualitySensor'));
+			const hasAirQualitySensor = getServiceArgs.some((call: any[]) => call && call[0] && call[0].name === 'AirQualitySensor');
+			expect(hasAirQualitySensor).toBe(true);
 
 			// Should setup filter maintenance service
-			expect(mockAccessory.getService).to.have.been.calledWith(sinon.match.has('name', 'FilterMaintenance'));
+			const hasFilterMaintenance = getServiceArgs.some((call: any[]) => call && call[0] && call[0].name === 'FilterMaintenance');
+			expect(hasFilterMaintenance).toBe(true);
 		});
 
 		afterEach(async () => {
@@ -237,7 +242,7 @@ describe('Homebridge Platform Integration', () => {
 			platform = new RabbitAirPlatform(mockLogger, invalidConfig, mockApi);
 			platform.discoverDevices();
 
-			expect(mockLogger.error).to.have.been.called;
+			expect(mockLogger.error.called).toBe(true);
 		});
 	});
 });

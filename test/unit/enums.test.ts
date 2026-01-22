@@ -1,8 +1,8 @@
-import { expect } from 'chai';
-import { 
-	RabbitAirMode, 
-	RabbitAirSpeed, 
-	RabbitAirQuality 
+import { expect, describe, it, vi } from 'vitest';
+import {
+	RabbitAirMode,
+	RabbitAirSpeed,
+	RabbitAirQuality
 } from '../../src/rabbitair-client.js';
 
 describe('RabbitAir Enums', () => {

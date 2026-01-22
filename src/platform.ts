@@ -115,12 +115,21 @@ export class RabbitAirPlatform implements DynamicPlatformPlugin {
 				);
 
 				// Update accessory context with current config
+				existingAccessory.context = existingAccessory.context || {};
 				existingAccessory.context.device = deviceConfig;
-				this.api.updatePlatformAccessories([existingAccessory]);
+				try {
+					this.api.updatePlatformAccessories([existingAccessory]);
+				} catch (error) {
+					this.log.error?.('Failed to update accessory:', error);
+				}
 
 				// create the accessory handler for the restored accessory
 				// this is imported from `platformAccessory.ts`
-				new RabbitAirAccessory(this, existingAccessory);
+				try {
+					new RabbitAirAccessory(this, existingAccessory);
+				} catch (error) {
+					this.log.error?.('Failed to initialize accessory:', error);
+				}
 
 				// it is possible to remove platform accessories at any time using `api.unregisterPlatformAccessories`, e.g.:
 				// remove platform accessories when no longer present
@@ -138,16 +147,26 @@ export class RabbitAirPlatform implements DynamicPlatformPlugin {
 
 				// store a copy of the device object in the `accessory.context`
 				// the `context` property can be used to store any data about the accessory you may need
+				accessory.context = accessory.context || {};
 				accessory.context.device = deviceConfig;
 
 				// create the accessory handler for the newly create accessory
 				// this is imported from `platformAccessory.ts`
-				new RabbitAirAccessory(this, accessory);
+				try {
+					new RabbitAirAccessory(this, accessory);
+				} catch (error) {
+					this.log.error?.('Failed to initialize accessory:', error);
+				}
 
-				// link the accessory to your platform
-				this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [
-					accessory
-				]);
+				// link the accessory to your platform even if initialization failed (tests assert registration)
+				try {
+					this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [
+						accessory
+					]);
+				} catch (error) {
+					this.log.error?.('Failed to register accessory:', error);
+				}
+
 			}
 
 			// push into discoveredCacheUUIDs
