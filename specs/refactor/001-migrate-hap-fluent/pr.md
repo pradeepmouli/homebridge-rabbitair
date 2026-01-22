@@ -1,6 +1,6 @@
 # Refactor: Migrate to hap-fluent & hap-test
 
-**Branch**: refactor/001-migrate-hap-fluent  
+**Branch**: refactor/001-migrate-hap-fluent
 **Spec**: specs/refactor/001-migrate-hap-fluent/refactor-spec.md
 
 ## Summary
