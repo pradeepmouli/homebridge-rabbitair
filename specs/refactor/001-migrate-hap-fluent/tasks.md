@@ -471,8 +471,8 @@
 - [X] T201 Review all changes: `git diff refactor-001-baseline..HEAD` (baseline ref missing; diffed against origin/latest..HEAD)
 - [X] T202 Stage all changes: `git add .`
 - [X] T203 Create final commit with comprehensive message documenting migration in refactor/001-migrate-hap-fluent branch
-- [ ] T204 Tag refactor completion: `git tag refactor-001-complete`
-- [ ] T205 Push branch and tags: `git push origin refactor/001-migrate-hap-fluent --tags`
+- [X] T204 Tag refactor completion: `git tag refactor-001-complete`
+- [X] T205 Push branch and tags: `git push origin refactor/001-migrate-hap-fluent --tags`
 
 ### Create Pull Request
 
