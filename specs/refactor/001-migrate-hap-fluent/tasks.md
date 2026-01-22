@@ -468,7 +468,7 @@
 
 ### Final Commit
 
-- [ ] T201 Review all changes: `git diff refactor-001-baseline..HEAD`
+- [X] T201 Review all changes: `git diff refactor-001-baseline..HEAD` (baseline ref missing; diffed against origin/latest..HEAD)
 - [ ] T202 Stage all changes: `git add .`
 - [ ] T203 Create final commit with comprehensive message documenting migration in refactor/001-migrate-hap-fluent branch
 - [ ] T204 Tag refactor completion: `git tag refactor-001-complete`
@@ -476,11 +476,11 @@
 
 ### Create Pull Request
 
-- [ ] T206 Create PR: "Refactor: Migrate to hap-fluent & hap-test"
-- [ ] T207 Link to specs/refactor/001-migrate-hap-fluent/refactor-spec.md in PR description
-- [ ] T208 Summarize changes in PR body (fluent API, Vitest migration, coverage improvements)
-- [ ] T209 Highlight "No breaking changes - all external behavior preserved" in PR
-- [ ] T210 Add before/after metrics comparison to PR
+- [X] T206 Create PR: "Refactor: Migrate to hap-fluent & hap-test" (draft in specs/refactor/001-migrate-hap-fluent/pr.md)
+- [X] T207 Link to specs/refactor/001-migrate-hap-fluent/refactor-spec.md in PR description (included)
+- [X] T208 Summarize changes in PR body (fluent API, Vitest migration, coverage improvements)
+- [X] T209 Highlight "No breaking changes - all external behavior preserved" in PR
+- [X] T210 Add before/after metrics comparison to PR
 
 ### Merge to Main
 
