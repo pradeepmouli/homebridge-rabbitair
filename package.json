@@ -2,7 +2,7 @@
   "name": "homebridge-rabbitair",
   "displayName": "Homebridge RabbitAir",
   "type": "module",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "private": false,
   "description": "Homebridge plugin for RabbitAir air purifiers",
   "author": "Pradeep Mouli",
@@ -39,6 +39,7 @@
     "watch": "npm run build && npm link && nodemon"
   },
   "dependencies": {
+    "@changesets/cli": "^2.29.8",
     "crypto-js": "^4.2.0",
     "hap-fluent": "^0.4.0",
     "hap-nodejs": "^1.2.0",
