@@ -36,7 +36,10 @@
     "test:watch": "vitest",
     "version": "changelog --release --commit",
     "prepublishOnly": "npm run lint && npm run test && npm run build",
-    "watch": "npm run build && npm link && nodemon"
+    "watch": "npm run build && npm link && nodemon",
+    "changeset": "changeset",
+    "changeset:version": "changeset version",
+    "changeset:publish": "pnpm run build && changeset publish"
   },
   "dependencies": {
     "@changesets/cli": "^2.29.8",
@@ -63,5 +66,6 @@
     "typescript": "5.9.3",
     "typescript-eslint": "^8.53.1",
     "vitest": "^4.0.17"
-  }
+  },
+  "packageManager": "pnpm@10.6.2"
 }
