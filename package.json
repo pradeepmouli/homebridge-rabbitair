@@ -22,7 +22,7 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "build": "rimraf ./dist && tsc",
+    "build": "rimraf ./dist && tsgo",
     "lint": "eslint . --max-warnings=0",
     "test": "vitest run",
     "test:unit": "vitest run test/unit",
@@ -37,7 +37,7 @@
     "changeset:version": "changeset version",
     "changeset:publish": "pnpm run build && changeset publish",
     "prepare": "simple-git-hooks",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsgo --noEmit",
     "format": "oxfmt .",
     "format:check": "oxfmt --check ."
   },
@@ -56,6 +56,7 @@
     "@types/crypto-js": "^4.2.2",
     "@types/node": "^25.0.9",
     "@types/sinon": "^21.0.0",
+    "@typescript/native-preview": "7.0.0-dev.20260219.1",
     "@vitest/coverage-istanbul": "^4.0.17",
     "homebridge": "^1.11.1",
     "jiti": "^2.6.1",
