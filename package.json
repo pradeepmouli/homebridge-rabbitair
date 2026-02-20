@@ -39,7 +39,11 @@
     "watch": "npm run build && npm link && nodemon",
     "changeset": "changeset",
     "changeset:version": "changeset version",
-    "changeset:publish": "pnpm run build && changeset publish"
+    "changeset:publish": "pnpm run build && changeset publish",
+    "prepare": "simple-git-hooks",
+    "type-check": "tsc --noEmit",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check ."
   },
   "dependencies": {
     "@changesets/cli": "^2.29.8",
@@ -65,7 +69,15 @@
     "type-fest": "^5.4.1",
     "typescript": "5.9.3",
     "typescript-eslint": "^8.53.1",
-    "vitest": "^4.0.17"
+    "vitest": "^4.0.17",
+    "simple-git-hooks": "^2.13.1",
+    "lint-staged": "^16.2.7",
+    "oxlint": "^1.35.0",
+    "oxfmt": "^0.20.0"
   },
-  "packageManager": "pnpm@10.6.2"
+  "packageManager": "pnpm@10.6.2",
+  "simple-git-hooks": {
+    "pre-commit": "pnpm lint-staged",
+    "pre-push": "pnpm run type-check"
+  }
 }
