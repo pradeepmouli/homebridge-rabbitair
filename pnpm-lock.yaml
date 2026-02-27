@@ -16,7 +16,7 @@ importers:
         version: 4.2.0
       hap-fluent:
         specifier: ^0.4.0
-        version: 0.4.0(hap-nodejs@1.2.0)(homebridge@1.11.1)
+        version: 0.4.0(hap-nodejs@1.2.0)(homebridge@1.11.2)
       hap-nodejs:
         specifier: ^1.2.0
         version: 1.2.0
@@ -32,7 +32,7 @@ importers:
         version: 0.5.2
       '@pmouli/hap-test':
         specifier: ^0.4.0
-        version: 0.4.0(hap-fluent@0.4.0(hap-nodejs@1.2.0)(homebridge@1.11.1))(hap-nodejs@1.2.0)(homebridge@1.11.1)(vitest@4.0.17(@types/node@25.0.9)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2))
+        version: 0.4.0(hap-fluent@0.4.0(hap-nodejs@1.2.0)(homebridge@1.11.2))(hap-nodejs@1.2.0)(homebridge@1.11.2)(vitest@4.0.17(@types/node@25.0.9)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2))
       '@types/crypto-js':
         specifier: ^4.2.2
         version: 4.2.2
@@ -50,7 +50,7 @@ importers:
         version: 4.0.17(vitest@4.0.17(@types/node@25.0.9)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2))
       homebridge:
         specifier: ^1.11.1
-        version: 1.11.1
+        version: 1.11.2
       jiti:
         specifier: ^2.6.1
         version: 2.6.1
@@ -408,8 +408,8 @@ packages:
     resolution: {integrity: sha512-yL/sLrpmtDaFEiUj1osRP4TI2MDz1AddJL+jZ7KSqvBuliN4xqYY54IfdN8qD8Toa6g1iloph1fxQNkjOxrrpQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@eslint/eslintrc@3.3.3':
-    resolution: {integrity: sha512-Kr+LPIUVKz2qkx1HAMH8q1q6azbqBAsXJUxBl/ODDuVPX45Z9DfwB8tPjTi6nNZ8BuM3nbJxC5zCAg5elnBUTQ==}
+  '@eslint/eslintrc@3.3.4':
+    resolution: {integrity: sha512-4h4MVF8pmBsncB60r0wSJiIeUKTSD4m7FmTFThG8RHlsg9ajqckLm9OraguFGZE4vVdpiI1Q4+hFnisopmG6gQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   '@eslint/js@9.38.0':
@@ -428,8 +428,16 @@ packages:
     resolution: {integrity: sha512-qK6ZgGx0wwOubq/MY6eTbhApQHBUQCvCOsTYpQE01uLvfA2/Prm6egySHlZouKaina1RPuDwfLhCmsRCxwHj3Q==}
     hasBin: true
 
+  '@homebridge/ciao@1.3.5':
+    resolution: {integrity: sha512-f7MAw7YuoEYgJEQ1VyRcLHGuVmCpmXi65GVR8CAtPWPqIZf/HFr4vHzVpOfQMpEQw9Pt5uh07guuLt5HE8ruog==}
+    hasBin: true
+
   '@homebridge/dbus-native@0.7.2':
     resolution: {integrity: sha512-BNVe6YNxiy5x/E5/ZXDIWMD6Njv9cjW59PM/1CMpYe0jLAJ8pJN+Tq/JhVs3gXwmTavz2S86/sspmHquChet8A==}
+    hasBin: true
+
+  '@homebridge/dbus-native@0.7.3':
+    resolution: {integrity: sha512-21RywQjjJPssTNdz9gZtKquShzlIz8hDQ1SGAYmOWdoRwSsi+znCt10LAjDSXB8AVVMwothTm0KQx2KJSBhLAg==}
     hasBin: true
 
   '@humanfs/core@0.19.1':
@@ -929,8 +937,13 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
-  ajv@6.12.6:
-    resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}
+  acorn@8.16.0:
+    resolution: {integrity: sha512-UVJyE9MttOsBQIDKw1skb9nAwQuR5wuGD3+82K6JgJlm/Y+KI92oNsMNGZCYdDsVtRHSak0pcV5Dno5+4jh9sw==}
+    engines: {node: '>=0.4.0'}
+    hasBin: true
+
+  ajv@6.14.0:
+    resolution: {integrity: sha512-IWrosm/yrn43eiKqkfkHis7QioDleaXQHdDVPKg0FSwwd/DuvyX79TZnFOnYpB7dcsFAMmtFztZuXPDvSePkFw==}
 
   ansi-colors@4.1.3:
     resolution: {integrity: sha512-/6w/C21Pm1A7aZitlI5Ni/2J6FFQN8i1Cvz3kHABAAbw93v/NlvKdVOqz7CCWz/3iv/JplRSEEZ83XION15ovw==}
@@ -998,6 +1011,9 @@ packages:
   better-path-resolve@1.0.0:
     resolution: {integrity: sha512-pbnl5XzGBdrFU/wT4jqmJVPn2B6UHPBOhzMQkY/SPUPB6QtUXtmBHBIwCbXJol93mOpGMnQyP/+BB19q04xj7g==}
     engines: {node: '>=4'}
+
+  bonjour-hap@3.10.0:
+    resolution: {integrity: sha512-2/jKd5X4WgvRQXIjwMtc26nT1cuD0DbAwmVJ9vq/IVvWUNxL7Tce3valQUXnkQ0yL38/jSmrXAUL2nPGZB9hGg==}
 
   bonjour-hap@3.9.1:
     resolution: {integrity: sha512-ubpbZSBwRyAx2+j5RLKFO+QuRvB02s+7rinC0rQzICx9hEc0zryjRz56Rr9lxoW7UkE/mnZ4rP4mnTCF4/iUkg==}
@@ -1337,8 +1353,8 @@ packages:
   from@0.1.7:
     resolution: {integrity: sha512-twe20eF1OxVxp/ML/kq2p1uc6KvFK/+vs8WjEbeKmV2He22MKm7YF2ANIt+EOqhJ5L3K/SuuPhk0hWQDjOM23g==}
 
-  fs-extra@11.3.2:
-    resolution: {integrity: sha512-Xr9F6z6up6Ws+NjzMCZc6WXg2YFRlrLP9NQDO3VQrWrfiojdhS56TzueT88ze0uBdCTwEIhQ3ptnmKeWGFAe0A==}
+  fs-extra@11.3.3:
+    resolution: {integrity: sha512-VWSRii4t0AFm6ixFFmLLx1t7wS1gh+ckoa84aOeapGum0h+EZd1EhEumSB+ZdDLnEPuucsVB9oB7cxJHap6Afg==}
     engines: {node: '>=14.14'}
 
   fs-extra@7.0.1:
@@ -1416,8 +1432,8 @@ packages:
       hap-nodejs: '>=0.13.0 <2.0.0'
       homebridge: '>=1.11.0'
 
-  hap-nodejs@0.14.0:
-    resolution: {integrity: sha512-AwvAJEP4lae6uWUb9qE+k+5uufMW38gppVOK+ujnjmJPt4DlNR5Biq2n7Q2xxiWKcWdpX328OtgGYorxbrHnlw==}
+  hap-nodejs@0.14.1:
+    resolution: {integrity: sha512-XZVQIi7zHe/3mTPLYZ7J4PKC0OB2fS/Bh9j77qKiLkxPNA6tgmOW/h3yfvOsB7LB/kHZpWiUnhODx/wZX6SjyQ==}
     engines: {node: ^18 || ^20 || ^22 || ^24}
 
   hap-nodejs@1.2.0:
@@ -1452,8 +1468,8 @@ packages:
     engines: {node: '>=10.4'}
     hasBin: true
 
-  homebridge@1.11.1:
-    resolution: {integrity: sha512-mZwBjnzwp2gb/Z30TAGEOXhTlywM7mfB/zNVqW7sfrq90LMFKc7eKnh7zpoybyQNyfBMpryHZRObNMh5aD+ERA==}
+  homebridge@1.11.2:
+    resolution: {integrity: sha512-O4fSZ5xDVItxGm6CvUmyo8s7bzG0LieWIQ5zath6v1WQW7O2I2Vr/Y/DLUHG+LijioVidP+ezZPcfye+d7djDg==}
     engines: {node: ^18.15.0 || ^20.7.0 || ^22 || ^24}
     hasBin: true
 
@@ -1714,8 +1730,8 @@ packages:
     resolution: {integrity: sha512-enIvLvRAFZYXJzkCYG5RKmPfrFArdLv+R+lbQ53BmIMLIry74bjKzX6iHAm8WYamJkhSSEabrWN5D97XnKObjQ==}
     engines: {node: 20 || >=22}
 
-  minimatch@3.1.2:
-    resolution: {integrity: sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==}
+  minimatch@3.1.5:
+    resolution: {integrity: sha512-VgjWUsnnT6n+NUk6eZq77zeFdpW2LWDzP6zFGrCbHXiYNul5Dzqk2HHQ5uFH2DNW5Xbp8+jVzaeNt94ssEEl4w==}
 
   minimatch@9.0.5:
     resolution: {integrity: sha512-G6T0ZX48xgozx7587koeX9Ys2NYy6Gmv//P89sEte9V9whIapMNF4idKxnW2QtCcLiTWlb/wfCabAtAFWhhBow==}
@@ -2030,6 +2046,11 @@ packages:
 
   semver@7.7.3:
     resolution: {integrity: sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q==}
+    engines: {node: '>=10'}
+    hasBin: true
+
+  semver@7.7.4:
+    resolution: {integrity: sha512-vFKC2IEtQnVhpT78h1Yp8wzwrf8CM+MzKMHGJZfBtzhZNycRFnXsHk6E5TxIkkMsgNS7mdX3AGB7x2QM2di4lA==}
     engines: {node: '>=10'}
     hasBin: true
 
@@ -2778,7 +2799,7 @@ snapshots:
     dependencies:
       '@eslint/object-schema': 2.1.7
       debug: 4.4.3
-      minimatch: 3.1.2
+      minimatch: 3.1.5
     transitivePeerDependencies:
       - supports-color
 
@@ -2794,16 +2815,16 @@ snapshots:
     dependencies:
       '@types/json-schema': 7.0.15
 
-  '@eslint/eslintrc@3.3.3':
+  '@eslint/eslintrc@3.3.4':
     dependencies:
-      ajv: 6.12.6
+      ajv: 6.14.0
       debug: 4.4.3
       espree: 10.4.0
       globals: 14.0.0
       ignore: 5.3.2
       import-fresh: 3.3.1
       js-yaml: 4.1.1
-      minimatch: 3.1.2
+      minimatch: 3.1.5
       strip-json-comments: 3.1.1
     transitivePeerDependencies:
       - supports-color
@@ -2826,7 +2847,25 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@homebridge/ciao@1.3.5':
+    dependencies:
+      debug: 4.4.3
+      fast-deep-equal: 3.1.3
+      source-map-support: 0.5.21
+      tslib: 2.8.1
+    transitivePeerDependencies:
+      - supports-color
+
   '@homebridge/dbus-native@0.7.2':
+    dependencies:
+      event-stream: 4.0.1
+      hexy: 0.3.5
+      long: 5.3.2
+      minimist: 1.2.8
+      safe-buffer: 5.2.1
+      xml2js: 0.6.2
+
+  '@homebridge/dbus-native@0.7.3':
     dependencies:
       event-stream: 4.0.1
       hexy: 0.3.5
@@ -2965,13 +3004,13 @@ snapshots:
 
   '@pinojs/redact@0.4.0': {}
 
-  '@pmouli/hap-test@0.4.0(hap-fluent@0.4.0(hap-nodejs@1.2.0)(homebridge@1.11.1))(hap-nodejs@1.2.0)(homebridge@1.11.1)(vitest@4.0.17(@types/node@25.0.9)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2))':
+  '@pmouli/hap-test@0.4.0(hap-fluent@0.4.0(hap-nodejs@1.2.0)(homebridge@1.11.2))(hap-nodejs@1.2.0)(homebridge@1.11.2)(vitest@4.0.17(@types/node@25.0.9)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
       hap-nodejs: 1.2.0
-      homebridge: 1.11.1
+      homebridge: 1.11.2
       vitest: 4.0.17(@types/node@25.0.9)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2)
     optionalDependencies:
-      hap-fluent: 0.4.0(hap-nodejs@1.2.0)(homebridge@1.11.1)
+      hap-fluent: 0.4.0(hap-nodejs@1.2.0)(homebridge@1.11.2)
 
   '@rollup/rollup-android-arm-eabi@4.55.3':
     optional: true
@@ -3170,7 +3209,7 @@ snapshots:
       '@typescript-eslint/visitor-keys': 8.53.1
       debug: 4.4.3
       minimatch: 9.0.5
-      semver: 7.7.3
+      semver: 7.7.4
       tinyglobby: 0.2.15
       ts-api-utils: 2.4.0(typescript@5.9.3)
       typescript: 5.9.3
@@ -3279,9 +3318,9 @@ snapshots:
       '@vitest/pretty-format': 4.0.17
       tinyrainbow: 3.0.3
 
-  acorn-jsx@5.3.2(acorn@8.15.0):
+  acorn-jsx@5.3.2(acorn@8.16.0):
     dependencies:
-      acorn: 8.15.0
+      acorn: 8.16.0
 
   acorn-walk@8.3.4:
     dependencies:
@@ -3289,7 +3328,9 @@ snapshots:
 
   acorn@8.15.0: {}
 
-  ajv@6.12.6:
+  acorn@8.16.0: {}
+
+  ajv@6.14.0:
     dependencies:
       fast-deep-equal: 3.1.3
       fast-json-stable-stringify: 2.1.0
@@ -3344,6 +3385,12 @@ snapshots:
   better-path-resolve@1.0.0:
     dependencies:
       is-windows: 1.0.2
+
+  bonjour-hap@3.10.0:
+    dependencies:
+      fast-deep-equal: 3.1.3
+      multicast-dns: 7.2.5
+      multicast-dns-service-types: 1.1.0
 
   bonjour-hap@3.9.1:
     dependencies:
@@ -3597,14 +3644,14 @@ snapshots:
       '@eslint/config-array': 0.21.1
       '@eslint/config-helpers': 0.4.2
       '@eslint/core': 0.16.0
-      '@eslint/eslintrc': 3.3.3
+      '@eslint/eslintrc': 3.3.4
       '@eslint/js': 9.38.0
       '@eslint/plugin-kit': 0.4.1
       '@humanfs/node': 0.16.7
       '@humanwhocodes/module-importer': 1.0.1
       '@humanwhocodes/retry': 0.4.3
       '@types/estree': 1.0.8
-      ajv: 6.12.6
+      ajv: 6.14.0
       chalk: 4.1.2
       cross-spawn: 7.0.6
       debug: 4.4.3
@@ -3623,7 +3670,7 @@ snapshots:
       is-glob: 4.0.3
       json-stable-stringify-without-jsonify: 1.0.1
       lodash.merge: 4.6.2
-      minimatch: 3.1.2
+      minimatch: 3.1.5
       natural-compare: 1.4.0
       optionator: 0.9.4
     optionalDependencies:
@@ -3633,8 +3680,8 @@ snapshots:
 
   espree@10.4.0:
     dependencies:
-      acorn: 8.15.0
-      acorn-jsx: 5.3.2(acorn@8.15.0)
+      acorn: 8.16.0
+      acorn-jsx: 5.3.2(acorn@8.16.0)
       eslint-visitor-keys: 4.2.1
 
   esprima@4.0.1: {}
@@ -3726,7 +3773,7 @@ snapshots:
 
   from@0.1.7: {}
 
-  fs-extra@11.3.2:
+  fs-extra@11.3.3:
     dependencies:
       graceful-fs: 4.2.11
       jsonfile: 6.2.0
@@ -3808,18 +3855,18 @@ snapshots:
 
   graceful-fs@4.2.11: {}
 
-  hap-fluent@0.4.0(hap-nodejs@1.2.0)(homebridge@1.11.1):
+  hap-fluent@0.4.0(hap-nodejs@1.2.0)(homebridge@1.11.2):
     dependencies:
       camelcase: 9.0.0
       hap-nodejs: 1.2.0
-      homebridge: 1.11.1
+      homebridge: 1.11.2
       pino: 10.2.1
 
-  hap-nodejs@0.14.0:
+  hap-nodejs@0.14.1:
     dependencies:
-      '@homebridge/ciao': 1.3.4
-      '@homebridge/dbus-native': 0.7.2
-      bonjour-hap: 3.9.1
+      '@homebridge/ciao': 1.3.5
+      '@homebridge/dbus-native': 0.7.3
+      bonjour-hap: 3.10.0
       debug: 4.4.3
       fast-srp-hap: 2.0.4
       futoin-hkdf: 1.5.3
@@ -3865,14 +3912,14 @@ snapshots:
 
   hexy@0.3.5: {}
 
-  homebridge@1.11.1:
+  homebridge@1.11.2:
     dependencies:
       chalk: 4.1.2
       commander: 13.1.0
-      fs-extra: 11.3.2
-      hap-nodejs: 0.14.0
+      fs-extra: 11.3.3
+      hap-nodejs: 0.14.1
       qrcode-terminal: 0.12.0
-      semver: 7.7.3
+      semver: 7.7.4
       source-map-support: 0.5.21
     transitivePeerDependencies:
       - supports-color
@@ -3997,7 +4044,7 @@ snapshots:
       '@babel/parser': 7.28.6
       '@istanbuljs/schema': 0.1.3
       istanbul-lib-coverage: 3.2.2
-      semver: 7.7.3
+      semver: 7.7.4
     transitivePeerDependencies:
       - supports-color
 
@@ -4113,7 +4160,7 @@ snapshots:
 
   make-dir@4.0.0:
     dependencies:
-      semver: 7.7.3
+      semver: 7.7.4
 
   make-error@1.3.6: {}
 
@@ -4134,7 +4181,7 @@ snapshots:
     dependencies:
       '@isaacs/brace-expansion': 5.0.0
 
-  minimatch@3.1.2:
+  minimatch@3.1.5:
     dependencies:
       brace-expansion: 1.1.12
 
@@ -4438,6 +4485,8 @@ snapshots:
   semver@6.3.1: {}
 
   semver@7.7.3: {}
+
+  semver@7.7.4: {}
 
   set-function-length@1.2.2:
     dependencies:
