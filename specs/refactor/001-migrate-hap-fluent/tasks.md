@@ -484,11 +484,11 @@
 
 ### Merge to Main
 
-- [ ] T211 Checkout main branch: `git checkout latest`
-- [ ] T212 Merge refactor branch: `git merge refactor/001-migrate-hap-fluent`
-- [ ] T213 Tag release: `git tag v1.0.6` (PATCH version - no breaking changes)
-- [ ] T214 Push to origin: `git push origin latest --tags`
-- [ ] T215 Verify GitHub Actions CI passes (if configured)
+- [X] T211 Checkout main branch: `git checkout latest`
+- [X] T212 Merge refactor branch: `git merge refactor/001-migrate-hap-fluent` (50 files changed, +14100/-3183; recursive strategy)
+- [X] T213 Tag release: `git tag v1.0.6` (PATCH version - no breaking changes)
+- [X] T214 Push to origin: `git push origin latest --tags`
+- [X] T215 Verify GitHub Actions CI passes (if configured) (tests: 123 pass/2 skip, build: success)
 
 **Checkpoint**: Refactor complete, merged to main, released
 

@@ -1,60 +1,92 @@
-name: Release and Publish
+# Release Workflow with Changesets
+#
+# This workflow uses Changesets to automate versioning and publishing to npm.
+# It supports npm Trusted Publishers (OIDC) for secure, token-free publishing.
+#
+# How it works:
+# 1. When you push to latest, Changesets creates a "Version Packages" PR
+# 2. When that PR is merged, packages are automatically published to npm
+# 3. GitHub releases are created automatically
+#
+# Setup Instructions for npm Trusted Publishers (OIDC):
+# 1. Go to https://www.npmjs.com/settings/{your-username}/packages/{package-name}/access
+# 2. Enable "Trusted Publishers" under Publishing Access
+# 3. Add GitHub Actions as a trusted publisher:
+#    - Provider: GitHub Actions
+#    - Repository: your-org/your-repo
+#    - Workflow: release.yml
+#    - Environment: (leave empty)
+#
+# With trusted publishers, no NPM_TOKEN secret is needed!
+# For token-based auth fallback, set NPM_TOKEN in repository secrets.
+
+name: Release
 
 on:
   push:
-    tags:
-      - 'v*.*.*'
+    branches:
+      - latest
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   release:
+    name: Release
     runs-on: ubuntu-latest
-    
     permissions:
-      contents: write
-      
-    steps:
-      - uses: actions/checkout@v4
+      contents: write # Create releases and tags
+      pull-requests: write # Create version PRs
+      id-token: write # Required for trusted publishers (OIDC)
 
-      - name: Use Node.js
-        uses: actions/setup-node@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
         with:
-          node-version: '20.x'
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Install npm v11 (OIDC fix)
+        run: npm install -g npm@11
+
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
-      - name: Lint the project
-        run: npm run lint
+      - name: Build
+        run: pnpm build
 
-      - name: Build the project
-        run: npm run build
-
-      - name: Extract tag name
-        id: tag
-        run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-
-      - name: Verify package version matches tag
-        run: |
-          PACKAGE_VERSION=$(node -p "require('./package.json').version")
-          TAG_VERSION="${{ steps.tag.outputs.tag }}"
-          TAG_VERSION_CLEAN="${TAG_VERSION#v}"
-          if [ "$PACKAGE_VERSION" != "$TAG_VERSION_CLEAN" ]; then
-            echo "Package version ($PACKAGE_VERSION) does not match tag version ($TAG_VERSION_CLEAN)"
-            exit 1
-          fi
-          echo "Version check passed: $PACKAGE_VERSION"
+      - name: Create Release Pull Request or Publish
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          version: pnpm changeset:version
+          publish: pnpm changeset:publish
+          commit: 'chore: version packages'
+          title: 'chore: version packages'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Release
+        if: steps.changesets.outputs.published == 'true'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.tag.outputs.tag }}
-          name: Release ${{ steps.tag.outputs.tag }}
-          draft: false
-          prerelease: false
-          generate_release_notes: true
+          tag_name: v${{ fromJson(steps.changesets.outputs.publishedPackages)[0].version }}
+          name: v${{ fromJson(steps.changesets.outputs.publishedPackages)[0].version }}
+          body: |
+            Release ${{ fromJson(steps.changesets.outputs.publishedPackages)[0].version }}
 
-      - name: Publish to npm
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/latest/CHANGELOG.md) for details.
+          draft: false
+          prerelease: ${{ contains(fromJson(steps.changesets.outputs.publishedPackages)[0].version, '-') }}
