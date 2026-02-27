@@ -31,7 +31,7 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "version": "changelog --release --commit",
-    "prepublishOnly": "npm run lint && npm run test && npm run build",
+    "prepublishOnly": "npm run clean && npm run lint && npm run test && npm run build",
     "watch": "npm run build && npm link && nodemon",
     "changeset": "changeset",
     "changeset:version": "changeset version",
@@ -39,7 +39,8 @@
     "prepare": "simple-git-hooks",
     "type-check": "tsgo --noEmit",
     "format": "oxfmt .",
-    "format:check": "oxfmt --check ."
+    "format:check": "oxfmt --check .",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo"
   },
   "dependencies": {
     "@changesets/cli": "^2.29.8",
