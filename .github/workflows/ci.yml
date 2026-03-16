@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [latest, develop]
+    branches: [latest, develop, "changeset-release/**"]
   pull_request:
-    branches: [latest, develop]
+    branches-ignore: ["sub**"]
 
 jobs:
   build-and-test:
